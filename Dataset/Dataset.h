@@ -12,11 +12,13 @@ class Dataset {
     private:
         std::vector<TimeSeries> dataset;
     public:
+        Dataset() = default;
         Dataset(std::string filename);
         Dataset(std::vector<TimeSeries> dataset);
         ~Dataset() = default;
 
         std::vector<TimeSeries> getDataset();
+        int size() { return this->dataset.size(); }
 };
 
 Dataset::Dataset(std::string filename) {

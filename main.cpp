@@ -5,11 +5,7 @@ using namespace std;
 
 int main()
 {
-    TimeSeries t;
-    t.setValues({1, 2, 3, 4, 5});
+    std::string datapath = "Dataset/datasets/synthetic/fourier_slice/fourier_slice_dataset.txt";
+    knnSearcher searcher(datapath);
 
-    for(auto v: t) {
-        cout << v << " ";
-    }
-    cout << endl;
 }
