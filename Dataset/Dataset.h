@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <ostream>
 #include <sstream>
 #include "Timeseries.h"
 
@@ -19,6 +20,11 @@ class Dataset {
 
         std::vector<TimeSeries> getDataset();
         int size() { return this->dataset.size(); }
+
+        std::vector<TimeSeries>::iterator begin();
+        std::vector<TimeSeries>::iterator end();
+
+        TimeSeries operator[](int index);
 };
 
 Dataset::Dataset(std::string filename) {
@@ -44,6 +50,18 @@ Dataset::Dataset(std::string filename) {
 
 std::vector<TimeSeries> Dataset::getDataset() {
     return this->dataset;
+}
+
+std::vector<TimeSeries>::iterator Dataset::begin() {
+    return this->dataset.begin();
+}
+
+std::vector<TimeSeries>::iterator Dataset::end() {
+    return this->dataset.end();
+}
+
+TimeSeries Dataset::operator[](int index) {
+    return this->dataset[index];
 }
 
 #endif
