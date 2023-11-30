@@ -13,7 +13,6 @@ class TimeSeries {
         std::vector<float> curPointsValues;
         std::vector<float> paaRepresentation;
         std::vector<std::pair<int, int>> iSAXRepresentation;
-        std::vector<std::pair<int, int>> tsToSAX(int wordLength, int segments);
 
         void getPAARepresentation(int segments);
         void getiSAXRepresentation(int segments, int wordLength);
@@ -32,6 +31,8 @@ class TimeSeries {
 
         std::vector <float>::iterator begin();
         std::vector <float>::iterator end();
+
+        std::vector<std::pair<int, int>> tsToiSAX(int wordLength, int segments);
 };
 
 

@@ -1,6 +1,7 @@
 #ifndef ISAX_H
 #define ISAX_H
 
+#include "knnSearcher.h"
 #include "TimeSeries.h"
 
 class iSAXSymbol {
@@ -36,7 +37,14 @@ class Node {
             return false;
         }
         void insert(TimeSeries ts){
-            std::vector <iSAXSymbol> tsSymbols = ts.tsToSAX();
+            //std::vector <iSAXSymbol> tsSymbols = ts.tsToSAX();
+            std::vector<iSAXSymbol> tsSymbols;
+            auto iSAXRepresentation = ts.tsToiSAX(3, 3);
+
+            for (auto& p: iSAXRepresentation) {
+                tsSymbols.emplace_back(p.first, p.second);
+            }
+
             if (isLeaf()){
                 this->ts.push_back(ts);
                 if (children.size() > threshold){
@@ -85,12 +93,16 @@ class Leaf: public Node {
         Node* parent;
     public:
         Leaf() = default;
+        Leaf(TimeSeries ts){
+            this->ts.push_back(ts);
+        }
         bool isLeaf(){
             return true;
         }
         void insert(TimeSeries ts){
             this->ts.push_back(ts);
         }
+
         void split (int turnSplit) {
             if (symbols[turnSplit].level < maxWith){
                 std::vector<iSAXSymbol> newSymbols0, newSymbols1;

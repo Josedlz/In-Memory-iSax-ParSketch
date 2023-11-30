@@ -74,7 +74,7 @@ void TimeSeries::getiSAXRepresentation(int segments, int wordLength) {
     }
 }
 
-std::vector<std::pair<int, int>> TimeSeries::tsToSAX(int wordLength, int segments) {
+std::vector<std::pair<int, int>> TimeSeries::tsToiSAX(int wordLength, int segments) {
 
     getPAARepresentation(segments);
     getiSAXRepresentation(segments, wordLength);
