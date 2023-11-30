@@ -1,4 +1,4 @@
-#include "TimeSeries/TimeSeries.h"
+#include "TimeSeries.h"
 
 
 TimeSeries::TimeSeries(std::vector<float> values) {

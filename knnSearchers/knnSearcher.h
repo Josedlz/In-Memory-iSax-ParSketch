@@ -17,7 +17,6 @@ class knnSearcher {
 
     public:
         knnSearcher(std::string filename);
-        ~knnSearcher() = default;
 
         virtual std::vector<TimeSeries> search(TimeSeries q, int k) = 0;
 
@@ -28,6 +27,8 @@ class knnSearcher {
         virtual void createIndex() = 0;
 
         void initialize();
+
+        virtual ~knnSearcher() = default;
 };
 
 #endif

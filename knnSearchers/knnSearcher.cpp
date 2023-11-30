@@ -1,4 +1,4 @@
-#include "knnSearchers/knnSearcher.h"
+#include "knnSearcher.h"
 
 
 void knnSearcher::loadDataset(std::string filename){
