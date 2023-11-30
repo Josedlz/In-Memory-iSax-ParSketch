@@ -74,16 +74,15 @@ void TimeSeries::getiSAXRepresentation(int segments, int wordLength) {
     }
 }
 
-std::vector<iSAXSymbol> TimeSeries::tsToSAX(int wordLength, int segments) {
+std::vector<std::pair<int, int>> TimeSeries::tsToSAX(int wordLength, int segments) {
 
     getPAARepresentation(segments);
     getiSAXRepresentation(segments, wordLength);
 
-    std::vector<iSAXSymbol> result;
 
     for (auto isax : this->iSAXRepresentation) {
-        result.emplace_back(isax.first, isax.second);
+        this->iSAXRepresentation.emplace_back(isax.first, isax.second);
     }
 
-    return result;
+    return this->iSAXRepresentation;
 }

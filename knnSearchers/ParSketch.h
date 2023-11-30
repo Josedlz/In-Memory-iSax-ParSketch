@@ -1,7 +1,6 @@
 #ifndef PARSKETCH_H
 #define PARSKETCH_H
 
-#include "knnSearcher.h"
 #include <time.h>
 #include <random>
 #include <iomanip>
@@ -9,6 +8,8 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
+
+#include "knnSearcher.h"
 
 using TSWithStats = std::tuple<std::vector<float>, std::pair<float, float>>;
 
@@ -206,10 +207,6 @@ std::vector<std::vector<int>> tsProgrSketch(const TSWithStats& tsWithStats,
 
     return result;
 }
-
-
-
-
 
 };
 

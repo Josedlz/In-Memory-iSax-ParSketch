@@ -21,3 +21,5 @@ class knnSearcher {
 
         void search(const std::vector<TimeSeries>& queries, int k);
 };
+
+#endif
