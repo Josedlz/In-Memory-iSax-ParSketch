@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 
-#include "Timeseries.h"
+#include "TimeSeries.h"
 #include "Dataset.h"
 
 class knnSearcher {
