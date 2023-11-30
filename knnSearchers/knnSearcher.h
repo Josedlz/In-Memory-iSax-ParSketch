@@ -5,21 +5,29 @@
 #include <vector>
 #include <string>
 
-#include "TimeSeries.h"
-#include "Dataset.h"
+#include "../TimeSeries/TimeSeries.h"
+#include "../Dataset/Dataset.h"
 
 class knnSearcher {
     private:
-        Dataset dataset;
         void loadDataset(std::string filename);
+
+    protected:
+        Dataset dataset;
 
     public:
         knnSearcher(std::string filename);
         ~knnSearcher() = default;
 
-        void search(TimeSeries q, int k);
+        virtual std::vector<TimeSeries> search(TimeSeries q, int k) = 0;
 
-        void search(const std::vector<TimeSeries>& queries, int k);
+        virtual std::vector<TimeSeries> search(const std::vector<TimeSeries>& queries, int k) = 0;
+
+        virtual void insert(TimeSeries t) = 0;
+
+        virtual void createIndex() = 0;
+
+        void initialize();
 };
 
 #endif

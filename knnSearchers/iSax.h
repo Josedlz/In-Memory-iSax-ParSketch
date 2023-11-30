@@ -2,7 +2,7 @@
 #define ISAX_H
 
 #include "knnSearcher.h"
-#include "TimeSeries.h"
+#include "../TimeSeries/TimeSeries.h"
 
 class iSAXSymbol {
     public:
@@ -20,13 +20,13 @@ class iSAXSymbol {
 class Node {
     public:
         std::vector<Node*> children;
-        std::vector<TimeSeries> ts;
+        std::vector<TimeSeries> datapoints;
         std::vector<iSAXSymbol> symbols;
         int turnSplit;
         int maxCard;
         int dimension;
         int threshold;
-        int maxWith;
+        int maxWidth;
         Node* parent;
 
         Node() = default;
@@ -46,8 +46,8 @@ class Node {
             }
 
             if (isLeaf()){
-                this->ts.push_back(ts);
-                if (children.size() > threshold){
+                this->datapoints.push_back(ts);
+                if (this->datapoints.size() > threshold){
                     split(turnSplit);
                     turnSplit = (turnSplit + 1) % dimension;
                 } 
@@ -55,7 +55,7 @@ class Node {
                 if(isRoot){
                     std::vector<iSAXSymbol> pref;
                     for (int i=0;tsSymbols.size();i++){
-                        pref.push_back(iSAXSymbol(((1<<maxWith) & tsSymbols[i].symbol),1));
+                        pref.push_back(iSAXSymbol(((1<<maxWidth) & tsSymbols[i].symbol),1));
                     }
                     bool inserted = false;
                     for (int i=0;i<children.size();i++){
@@ -104,7 +104,7 @@ class Leaf: public Node {
         }
 
         void split (int turnSplit) {
-            if (symbols[turnSplit].level < maxWith){
+            if (symbols[turnSplit].level < maxWidth){
                 std::vector<iSAXSymbol> newSymbols0, newSymbols1;
                 // convierto a interno
                 newSymbols0 = symbols;
@@ -125,18 +125,21 @@ class Leaf: public Node {
         ~Leaf() = default;
 };
 
-class iSaxSearcher: public knnSearcher {
+class iSAXSearcher: public knnSearcher {
     private:
         Node* root;
         int maxCard;
         int dimension;
         int threshold;
     public:
-        iSaxSearcher() = default;
-        void insert(TimeSeries ts){
-            root->insert(ts);
-        }
-        ~iSaxSearcher() = default;
+        using knnSearcher::knnSearcher;
+
+        ~iSAXSearcher() = default;
+
+        std::vector<TimeSeries> search(TimeSeries q, int k) override;
+        std::vector<TimeSeries> search(const std::vector<TimeSeries>& queries, int k) override;
+        void insert(TimeSeries ts) override;
+        void createIndex() override;
 };
 
 #endif

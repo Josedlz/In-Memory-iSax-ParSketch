@@ -7,7 +7,7 @@
 #include <iostream>
 #include <ostream>
 #include <sstream>
-#include "TimeSeries.h"
+#include "../TimeSeries/TimeSeries.h"
 
 class Dataset {
     private:
