@@ -104,31 +104,49 @@ void Leaf::split (int turnSplit) {
 
 std::vector<TimeSeries> iSAXSearcher::search(TimeSeries q, int k) {
     // best first search
-    std::vector<TimeSeries> result;
+    indexablePQ<TimeSeries> result(k);
     auto iSAXRepresentation = q.tsToiSAX(3, 3);
-    std::vector<iSAXSymbol> tsSymbols;
+    std::vector<iSAXSymbol> word;
+
     for (auto& p: iSAXRepresentation) {
-        tsSymbols.emplace_back(p.first, p.second);
+        word.emplace_back(p.first, p.second);
     }
+
     std::priority_queue<std::pair<double, Node*>> candidates;
 
     candidates.push(std::make_pair(0, root));
+    
+
     while (!candidates.empty() && result.size() < k){
         auto candidate = candidates.top();
         candidates.pop();
+
+        if (candidate.first > result[k-1].first){
+            break;
+        }
+
         if (candidate.second->isLeaf()){
             for (auto& ts: candidate.second->datapoints){
-                result.push_back(ts);
+                if (q.euclideanDist(ts) < result[k-1].first){
+                    result.push(std::make_pair(q.euclideanDist(ts), ts));
+                }
             }
         } else {
             for (auto& child: candidate.second->children){
-                if (child->covers(tsSymbols)){
+                if (child->covers(word)){
                     candidates.push(std::make_pair(q.minDist(child->symbols, maxWidth, dimension), child));
                 }
             }
         }
     }
-    return result;
+
+    std::vector<TimeSeries> ret;
+
+    for (auto& p: result){
+        ret.push_back(p.second);
+    }
+
+    return ret;
 
 }
 
