@@ -18,7 +18,7 @@ bool Node::covers(std::vector<iSAXSymbol> tsSymbols) {
     return covered; 
 }
 
-void Node::insert(TimeSeries ts){
+void Internal::insert(TimeSeries ts){
     //std::vector <iSAXSymbol> tsSymbols = ts.tsToSAX();
     std::vector<iSAXSymbol> tsSymbols;
     auto iSAXRepresentation = ts.tsToiSAX(3, 3);
@@ -26,36 +26,45 @@ void Node::insert(TimeSeries ts){
     for (auto& p: iSAXRepresentation) {
         tsSymbols.emplace_back(p.first, p.second);
     }
-
-    if (isLeaf()){
-        this->datapoints.push_back(ts);
-        if (this->datapoints.size() > threshold){
-            split(turnSplit);
-            turnSplit = (turnSplit + 1) % dimension;
-        } 
+    if(isRoot()){
+        std::vector<iSAXSymbol> pref;
+        for (int i=0;tsSymbols.size();i++){
+            pref.push_back(iSAXSymbol((tsSymbols[i].symbol>>(tsSymbols[i].level-1))&1,1));
+        }
+        bool inserted = false;
+        for (int i=0;i<children.size();i++){
+            if (children[i]->covers(pref)){
+                children[i]->insert(ts);
+                inserted = true;
+                break;
+            }
+        }
+        if (!inserted) children.push_back(new Leaf(ts));
     } else {
-        if(isRoot()){
-            std::vector<iSAXSymbol> pref;
-            for (int i=0;tsSymbols.size();i++){
-                pref.push_back(iSAXSymbol(((1<<maxWidth) & tsSymbols[i].symbol),1));
+        bool inserted = false;
+        for (int i=0;i<children.size();i++){
+            if (children[i]->covers(tsSymbols)){
+                children[i]->insert(ts);
+                inserted = true;
+                break;
             }
-            bool inserted = false;
-            for (int i=0;i<children.size();i++){
-                if (children[i]->covers(pref)){
-                    children[i]->insert(ts);
-                    inserted = true;
-                    break;
-                }
-            }
-            if (!inserted) children.push_back(new Leaf(ts));
         }
     }
+}
+
+void Leaf::insert(TimeSeries ts) {
+    this->datapoints.push_back(ts);
+    if (this->datapoints.size() > threshold){
+        split(turnSplit);
+        turnSplit = (turnSplit + 1) % dimension;
+    } 
 }
 
 void Leaf::split (int turnSplit) {
     if (symbols[turnSplit].level < maxWidth){
         std::vector<iSAXSymbol> newSymbols0, newSymbols1;
-        // convierto a interno
+        Internal* newNode = new Internal();
+        newNode->parent = this->parent;
         newSymbols0 = symbols;
         newSymbols0[turnSplit].level++;
         newSymbols0[turnSplit].symbol *= 2;
@@ -65,14 +74,24 @@ void Leaf::split (int turnSplit) {
 
         Node* newChild0 = new Leaf();
         Node* newChild1 = new Leaf();
-        newChild0->parent = this;
-        newChild1->parent = this;
+        newChild0->parent = newNode;
+        newChild1->parent = newNode;
         newChild0->symbols = newSymbols0;
         newChild1->symbols = newSymbols1;
+        newNode->children.push_back(newChild0);
+        newNode->children.push_back(newChild1);
+
 
         // redistribuyo los datos
         for (auto& ts: datapoints){
-            if (newChild0->covers(ts.tsToiSAX(3, 3))){
+            std::vector<iSAXSymbol> tsSymbols;
+            auto iSAXRepresentation = ts.tsToiSAX(3, 3);
+
+            for (auto& p: iSAXRepresentation) {
+                tsSymbols.emplace_back(p.first, p.second);
+            }
+
+            if (newChild0->covers(tsSymbols)){
                 newChild0->insert(ts);
             } else {
                 newChild1->insert(ts);
@@ -101,6 +120,6 @@ void iSAXSearcher::insert(TimeSeries ts) {
 
 void iSAXSearcher::createIndex() {
     for (auto&ts: dataset){
-        this->insert(ts);
+        root->insert(ts);
     }
 }

@@ -40,11 +40,10 @@ class Node {
         bool isLeaf(){
             return false;
         }
-        void insert(TimeSeries ts);
+
+        virtual void insert(TimeSeries ts) = 0;
         
         bool covers(std::vector<iSAXSymbol> tsSymbols);
-
-        virtual void split (int turnSplit) = 0;
 
         virtual ~Node() = default;
 };
@@ -55,13 +54,20 @@ class Leaf: public Node {
         bool isLeaf(){
             return true;
         }
-        void insert(TimeSeries ts){
-            this->datapoints.push_back(ts);
-        }
 
-        void split (int turnSplit) override;
+        void insert(TimeSeries ts) override;
+        void split (int turnSplit);
 
         ~Leaf() = default;
+};
+
+class Internal: public Node {
+    public:
+        using Node::Node;
+
+        void insert(TimeSeries ts) override;
+
+        ~Internal() = default;
 };
 
 class iSAXSearcher: public knnSearcher {

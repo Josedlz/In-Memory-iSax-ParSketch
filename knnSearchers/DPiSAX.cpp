@@ -1,7 +1,7 @@
 #include <mpi.h>
 #include "DPiSAX.h"
 
-DPiSAX::DPiSAX(std::string filename) : knnSearcher(filename) {
+DPiSAX::DPiSAX(std::string filename) {
     // Initialize MPI
     MPI_Init(nullptr, nullptr);
     // Additional DPiSAX-specific setup, like determining dataset partitions
