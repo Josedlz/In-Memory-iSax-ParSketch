@@ -16,7 +16,7 @@ class Node {
         std::vector<Node*> children;
         std::vector<TimeSeries> datapoints;
         std::vector<iSAXSymbol> symbols;
-        int turnSplit;
+        int turnSplit = 0;
         //int maxCard;
         int wordLength;
         int threshold;
@@ -28,15 +28,15 @@ class Node {
             this->wordLength = WORD_LENGTH;
             this->cardinality = CARDINALITY;
 
-            this->symbols.resize(wordLength, iSAXSymbol(0, 0));
+            this->symbols.resize(wordLength, iSAXSymbol(0, cardinality));
         };
 
-        Node(TimeSeries ts) {
+        Node(TimeSeries ts, std::vector<iSAXSymbol> nodeSymbols) {
             this->threshold = THRESHOLD;
             this->wordLength = WORD_LENGTH;
             this->cardinality = CARDINALITY;
 
-            this->symbols.resize(wordLength, iSAXSymbol(0, 0));
+            this->symbols = nodeSymbols;
 
             this->datapoints.push_back(ts);
         } 

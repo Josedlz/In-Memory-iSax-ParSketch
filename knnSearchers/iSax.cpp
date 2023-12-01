@@ -45,7 +45,7 @@ void Internal::insert(TimeSeries ts){
                 break;
             }
         }
-        if (!inserted) children.push_back(new Leaf(ts));
+        if (!inserted) children.push_back(new Leaf(ts, pref));
     } else {
         std::cout << "We are in an internal node" << std::endl;
         bool inserted = false;
@@ -171,8 +171,8 @@ void iSAXSearcher::insert(TimeSeries ts) {
 void iSAXSearcher::createIndex() {
     int i = 0;
     for (auto&ts: dataset){
-        //std::cout << "Inserting " << i << std::endl;
+        std::cout << "Inserting " << i << std::endl;
         root->insert(ts);
-        //std::cout << "Inserted " << i++ << std::endl;
+        std::cout << "Inserted " << i++ << std::endl;
     }
 }
