@@ -12,14 +12,26 @@ class Node {
         std::vector<TimeSeries> datapoints;
         std::vector<iSAXSymbol> symbols;
         int turnSplit;
-        int maxCard;
-        int dimension;
+        //int maxCard;
+        int wordLength;
         int threshold;
-        int maxWidth;
+        int cardinality;
         Node* parent;
 
-        Node() = default;
+        Node() {
+            this->threshold = 100;
+            this->wordLength = 4;
+            this->cardinality = 4;
+
+            this->symbols.resize(wordLength, iSAXSymbol(0, 0));
+        };
         Node(TimeSeries ts) {
+            this->threshold = 100;
+            this->wordLength = 3;
+            this->cardinality = 3;
+
+            this->symbols.resize(wordLength, iSAXSymbol(0, 0));
+
             this->datapoints.push_back(ts);
         } 
 
@@ -61,13 +73,16 @@ class Internal: public Node {
 
 class iSAXSearcher: public knnSearcher {
     private:
-        Node* root;
+        Leaf* root;
         int maxCard;
-        int dimension;
+        int wordLength;
         int threshold;
-        int maxWidth;
+        int cardinality;
     public:
-        using knnSearcher::knnSearcher;
+
+        iSAXSearcher(std::string filename) : knnSearcher(filename) {
+            this->root = new Leaf();
+        }
 
         ~iSAXSearcher() = default;
 

@@ -1,0 +1,28 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "build", // This label is referenced in launch.json
+            "command": "/usr/bin/g++",
+            "args": [
+                "-fopenmp",
+                "-g", // Include debug information
+                "${workspaceFolder}/main.cpp", 
+                "${workspaceFolder}/knnSearchers/knnSearcher.cpp",
+                "${workspaceFolder}/knnSearchers/iSax.cpp",
+                "${workspaceFolder}/TimeSeries/TimeSeries.cpp",
+                "${workspaceFolder}/Dataset/Dataset.cpp",
+                "-o",
+                "${workspaceFolder}/a.out" // The output binary, referenced in launch.json
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        }
+    ]
+}

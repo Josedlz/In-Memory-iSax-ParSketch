@@ -1,6 +1,7 @@
 #include "iSax.h"
 #include "../TimeSeries/TimeSeries.h"
 #include <queue>
+#include <iostream>
 
 bool Node::covers(std::vector<iSAXSymbol> tsSymbols) {
     bool covered = true;
@@ -21,13 +22,17 @@ bool Node::covers(std::vector<iSAXSymbol> tsSymbols) {
 
 void Internal::insert(TimeSeries ts){
     //std::vector <iSAXSymbol> tsSymbols = ts.tsToSAX();
+    std::cout << "instantiating tsSymbols" << std::endl;
     std::vector<iSAXSymbol> tsSymbols;
-    auto iSAXRepresentation = ts.tsToiSAX(3, 3);
+    std::cout << "Converting to iSAX" << std::endl;
+    auto iSAXRepresentation = ts.tsToiSAX(this->cardinality, this->wordLength);
+    std::cout << "Converted to iSAX" << std::endl;
 
     for (auto& p: iSAXRepresentation) {
         tsSymbols.emplace_back(p.first, p.second);
     }
     if(isRoot()){
+        //std::cout << "We are in the root" << std::endl;
         std::vector<iSAXSymbol> pref;
         for (int i=0;tsSymbols.size();i++){
             pref.push_back(iSAXSymbol((tsSymbols[i].symbol>>(tsSymbols[i].level-1))&1,1));
@@ -42,6 +47,7 @@ void Internal::insert(TimeSeries ts){
         }
         if (!inserted) children.push_back(new Leaf(ts));
     } else {
+        //std::cout << "We are in an internal node" << std::endl;
         bool inserted = false;
         for (int i=0;i<children.size();i++){
             if (children[i]->covers(tsSymbols)){
@@ -54,15 +60,16 @@ void Internal::insert(TimeSeries ts){
 }
 
 void Leaf::insert(TimeSeries ts) {
+    //std::cout << "Inserting in leaf" << std::endl;
     this->datapoints.push_back(ts);
     if (this->datapoints.size() > threshold){
         split(turnSplit);
-        turnSplit = (turnSplit + 1) % dimension;
+        turnSplit = (turnSplit + 1) % wordLength;
     } 
 }
 
 void Leaf::split (int turnSplit) {
-    if (symbols[turnSplit].level < maxWidth){
+    if (symbols[turnSplit].level < cardinality){
         std::vector<iSAXSymbol> newSymbols0, newSymbols1;
         Internal* newNode = new Internal();
         newNode->parent = this->parent;
@@ -134,7 +141,7 @@ std::vector<TimeSeries> iSAXSearcher::search(TimeSeries q, int k) {
         } else {
             for (auto& child: candidate.second->children){
                 if (child->covers(word)){
-                    candidates.push(std::make_pair(q.minDist(child->symbols, maxWidth, dimension), child));
+                    candidates.push(std::make_pair(q.minDist(child->symbols, cardinality, wordLength), child));
                 }
             }
         }
@@ -162,7 +169,10 @@ void iSAXSearcher::insert(TimeSeries ts) {
 }
 
 void iSAXSearcher::createIndex() {
+    int i = 0;
     for (auto&ts: dataset){
+        //std::cout << "Inserting " << i << std::endl;
         root->insert(ts);
+        //std::cout << "Inserted " << i++ << std::endl;
     }
 }

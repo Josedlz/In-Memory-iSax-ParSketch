@@ -11,9 +11,7 @@ int main()
     iSAXSearcher searcher(datapath);
     std::cout << "Data loaded" << std::endl;
 
-    std::cout << "Initializing searcher" << std::endl;
     searcher.initialize();
-    std::cout << "Searcher initialized" << std::endl;
 
     //Getting the first time series from datapath
     std::ifstream file(datapath);
