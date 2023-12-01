@@ -3,11 +3,9 @@
 
 #include <algorithm>
 #include <vector>
-#include <limits>
+#include <climits>
 
-std::vector<std::vector<double>> getDistanceMatrix(int alphabetSize){
 
-}
 
 class iSAXSymbol {
     public:
@@ -29,10 +27,10 @@ class iSAXSymbol {
             }
 
             if (a.level == b.level) {
-                std::vector<std::vector<double>> distMat = getDistanceMatrix(1 << a.level);
+                std::vector<std::vector<double>> distMat; //= getDistanceMatrix(1 << a.level);
                 return distMat[a.symbol][b.symbol];
             } else {
-                std::vector<std::vector<double>> distMat = getDistanceMatrix(1 << b.level);
+                std::vector<std::vector<double>> distMat; //= getDistanceMatrix(1 << b.level);
                 int widthDiff = b.level - a.level;
                 int rsBLoad = b.symbol >> widthDiff;
                 if (a.symbol > rsBLoad) {
@@ -46,8 +44,6 @@ class iSAXSymbol {
                 }
             }
         }
-
-        iSAXSymbol() = default;
         ~iSAXSymbol() = default;
 };
 

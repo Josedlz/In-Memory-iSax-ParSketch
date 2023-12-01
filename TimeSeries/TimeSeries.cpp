@@ -1,6 +1,7 @@
 #include "TimeSeries.h"
 
 
+
 TimeSeries::TimeSeries(std::vector<float> values) {
     this->values = values;
     this->length = values.size();

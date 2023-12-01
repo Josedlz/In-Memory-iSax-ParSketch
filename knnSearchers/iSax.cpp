@@ -102,8 +102,6 @@ void Leaf::split (int turnSplit) {
 
 
 std::vector<TimeSeries> iSAXSearcher::search(TimeSeries q, int k) {
-    //root->search(q, k);
-
     return std::vector<TimeSeries>();
 }
 
