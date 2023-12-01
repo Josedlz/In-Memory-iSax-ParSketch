@@ -52,13 +52,13 @@ class TimeSeries {
     private:
         int length;
         std::vector<float> values;
-        std::vector<float> cutPointsSegments;
+        std::vector<float> breakpoints;
         std::vector<float> curPointsValues;
         std::vector<float> paaRepresentation;
         std::vector<std::pair<int, int>> iSAXRepresentation;
 
-        void getPAARepresentation(int segments);
-        void getiSAXRepresentation(int segments, int wordLength);
+        void getPAARepresentation(int wordLength);
+        void getiSAXRepresentation(int wordLength, int cardinality);
 
     public:
         TimeSeries() = default;
@@ -75,9 +75,11 @@ class TimeSeries {
         std::vector <float>::iterator begin();
         std::vector <float>::iterator end();
 
-        std::vector<std::pair<int, int>> tsToiSAX(int wordLength, int segments);
+        std::vector<std::pair<int, int>> tsToiSAX(int cardinality, int wordLength);
 
-        int minDist(std::vector<iSAXSymbol> o, int maxWith, int segments);
+        int minDist(std::vector<iSAXSymbol> o, int maxWith, int wordLength);
+
+        double euclideanDist(TimeSeries o);
 };
 
 

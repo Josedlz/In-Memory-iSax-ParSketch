@@ -22,6 +22,8 @@ Dataset::Dataset(std::string filename) {
 
         this->dataset.emplace_back(values);
     }
+
+    file.close();
 }
 
 std::vector<TimeSeries> Dataset::getDataset() {

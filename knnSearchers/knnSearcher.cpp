@@ -10,5 +10,7 @@ knnSearcher::knnSearcher(std::string filename){
 }
 
 void knnSearcher::initialize() {
+    std::cout << "Initializing searcher" << std::endl;
     createIndex();
+    std::cout << "Searcher initialized" << std::endl;
 }

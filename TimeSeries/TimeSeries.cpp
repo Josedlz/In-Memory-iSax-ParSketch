@@ -28,21 +28,21 @@ std::vector <float>::iterator TimeSeries::end() {
     return this->values.end();
 }
 
-void TimeSeries::getPAARepresentation(int segments) {
-    this->paaRepresentation.resize(segments, 0.0f);
+void TimeSeries::getPAARepresentation(int wordLength) {
+    this->paaRepresentation.resize(wordLength, 0.0f);
 
-    this->cutPointsSegments.resize(segments);
+    this->breakpoints.resize(wordLength);
 
-    for (int i = 0; i < segments - 1; i++) {
-        this->cutPointsSegments[i] = 0 + int(this->values.size() / segments) * (i + 1);
+    for (int i = 0; i < wordLength - 1; i++) {
+        this->breakpoints[i] = 0 + int(this->values.size() / wordLength) * (i + 1);
     }
 
     int currentIndexCurrentBucket = 0;
     int lastIndexPreviousBucket = 0;
 
-    for (int segment = 0; segment < segments; segment++) {
+    for (int segment = 0; segment < wordLength; segment++) {
 
-        while (currentIndexCurrentBucket < cutPointsSegments[segment]) {
+        while (currentIndexCurrentBucket < breakpoints[segment]) {
             this->paaRepresentation[segment] += this->values[currentIndexCurrentBucket];
             currentIndexCurrentBucket++;
         }
@@ -52,33 +52,33 @@ void TimeSeries::getPAARepresentation(int segments) {
     }
 }
 
-void TimeSeries::getiSAXRepresentation(int segments, int wordLength) {
+void TimeSeries::getiSAXRepresentation(int wordLength, int cardinality) {
 
     float min = *std::min_element(this->values.begin(), this->values.end());
     float max = *std::max_element(this->values.begin(), this->values.end());
 
     float range = max - min;
 
-    float step = range / (1<<wordLength);
+    float step = range / (1<<cardinality);
 
-    this->iSAXRepresentation.resize(segments, std::make_pair(0, wordLength));
+    this->iSAXRepresentation.resize(wordLength, std::make_pair(0, cardinality));
 
-    for (int i = 0; i < segments; i++) {
+    for (int i = 0; i < wordLength; i++) {
         auto PAA = this->paaRepresentation[i];
 
-        for (int j = 0; j < (1<<wordLength); j++) {
+        for (int j = 0; j < (1<<cardinality); j++) {
             if (PAA >= min + j * step && PAA <= min + (j + 1) * step) {
-                this->iSAXRepresentation[i] = std::make_pair(j, wordLength);
+                this->iSAXRepresentation[i] = std::make_pair(j, cardinality);
                 break;
             }
         }
     }
 }
 
-std::vector<std::pair<int, int>> TimeSeries::tsToiSAX(int wordLength, int segments) {
+std::vector<std::pair<int, int>> TimeSeries::tsToiSAX(int wordLength, int cardinality) {
 
-    getPAARepresentation(segments);
-    getiSAXRepresentation(segments, wordLength);
+    getPAARepresentation(wordLength);
+    getiSAXRepresentation(wordLength, cardinality);
 
 
     for (auto isax : this->iSAXRepresentation) {
@@ -88,13 +88,24 @@ std::vector<std::pair<int, int>> TimeSeries::tsToiSAX(int wordLength, int segmen
     return this->iSAXRepresentation;
 }
 
-int TimeSeries::minDist(std::vector<iSAXSymbol> o, int maxWith, int segments) {
-    auto thisiSAX = this->tsToiSAX(maxWith, segments);
+int TimeSeries::minDist(std::vector<iSAXSymbol> o, int cardinality, int wordLength) {
+    auto thisiSAX = this->tsToiSAX(cardinality, wordLength);
 
     int dist = 0;
 
-    for (int i = 0; i < segments; i++) {
+    for (int i = 0; i < wordLength; i++) {
         double temp = iSAXSymbol(thisiSAX[i].first, thisiSAX[i].second).minDist(o[i]);
+        dist += temp * temp;
+    }
+
+    return dist;
+}
+
+double TimeSeries::euclideanDist(TimeSeries o) {
+    double dist = 0;
+
+    for (int i = 0; i < this->length; i++) {
+        double temp = this->values[i] - o.values[i];
         dist += temp * temp;
     }
 
