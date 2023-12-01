@@ -6,7 +6,12 @@
 #include "knnSearcher.h"
 #include "../TimeSeries/TimeSeries.h"
 
+
 class Node {
+    private:
+        int THRESHOLD = 5;
+        int WORD_LENGTH = 4;
+        int CARDINALITY = 4;
     public:
         std::vector<Node*> children;
         std::vector<TimeSeries> datapoints;
@@ -19,16 +24,17 @@ class Node {
         Node* parent;
 
         Node() {
-            this->threshold = 100;
-            this->wordLength = 4;
-            this->cardinality = 4;
+            this->threshold = THRESHOLD;
+            this->wordLength = WORD_LENGTH;
+            this->cardinality = CARDINALITY;
 
             this->symbols.resize(wordLength, iSAXSymbol(0, 0));
         };
+
         Node(TimeSeries ts) {
-            this->threshold = 100;
-            this->wordLength = 3;
-            this->cardinality = 3;
+            this->threshold = THRESHOLD;
+            this->wordLength = WORD_LENGTH;
+            this->cardinality = CARDINALITY;
 
             this->symbols.resize(wordLength, iSAXSymbol(0, 0));
 
@@ -73,7 +79,7 @@ class Internal: public Node {
 
 class iSAXSearcher: public knnSearcher {
     private:
-        Leaf* root;
+        Internal* root;
         int maxCard;
         int wordLength;
         int threshold;
@@ -81,7 +87,7 @@ class iSAXSearcher: public knnSearcher {
     public:
 
         iSAXSearcher(std::string filename) : knnSearcher(filename) {
-            this->root = new Leaf();
+            this->root = new Internal();
         }
 
         ~iSAXSearcher() = default;

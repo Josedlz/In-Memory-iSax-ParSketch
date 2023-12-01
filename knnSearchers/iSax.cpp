@@ -32,13 +32,13 @@ void Internal::insert(TimeSeries ts){
         tsSymbols.emplace_back(p.first, p.second);
     }
     if(isRoot()){
-        //std::cout << "We are in the root" << std::endl;
+        std::cout << "We are in the root" << std::endl;
         std::vector<iSAXSymbol> pref;
-        for (int i=0;tsSymbols.size();i++){
+        for (int i=0; i < tsSymbols.size(); i++){
             pref.push_back(iSAXSymbol((tsSymbols[i].symbol>>(tsSymbols[i].level-1))&1,1));
         }
         bool inserted = false;
-        for (int i=0;i<children.size();i++){
+        for (int i=0; i < children.size();i++){
             if (children[i]->covers(pref)){
                 children[i]->insert(ts);
                 inserted = true;
@@ -47,7 +47,7 @@ void Internal::insert(TimeSeries ts){
         }
         if (!inserted) children.push_back(new Leaf(ts));
     } else {
-        //std::cout << "We are in an internal node" << std::endl;
+        std::cout << "We are in an internal node" << std::endl;
         bool inserted = false;
         for (int i=0;i<children.size();i++){
             if (children[i]->covers(tsSymbols)){
@@ -60,7 +60,7 @@ void Internal::insert(TimeSeries ts){
 }
 
 void Leaf::insert(TimeSeries ts) {
-    //std::cout << "Inserting in leaf" << std::endl;
+    std::cout << "Inserting in leaf" << std::endl;
     this->datapoints.push_back(ts);
     if (this->datapoints.size() > threshold){
         split(turnSplit);
@@ -112,7 +112,7 @@ void Leaf::split (int turnSplit) {
 std::vector<TimeSeries> iSAXSearcher::search(TimeSeries q, int k) {
     // best first search
     indexablePQ<TimeSeries> result(k);
-    auto iSAXRepresentation = q.tsToiSAX(3, 3);
+    auto iSAXRepresentation = q.tsToiSAX(4, 4);
     std::vector<iSAXSymbol> word;
 
     for (auto& p: iSAXRepresentation) {

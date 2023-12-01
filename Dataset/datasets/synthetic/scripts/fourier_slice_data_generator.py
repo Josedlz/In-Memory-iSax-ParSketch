@@ -2,13 +2,13 @@ import numpy as np
 import scipy.fftpack
 
 # Parameters
-num_series = 200  # Total number of time series
-time_points = 50  # Length of each time series
+num_series = 30  # Total number of time series
+time_points = 20  # Length of each time series
 x = 10  # Number of high amplitude frequency components
 y = 0  # Starting frequency component for high amplitude
 high_amplitude = 10  # Arbitrary value for high amplitude
 low_amplitude = 1  # Arbitrary value for low amplitude
-chunk_size = num_series // 100  # Number of time series to process at a time
+chunk_size = num_series // 30  # Number of time series to process at a time
 
 path_to_save = '../fourier_slice/fourier_slice_dataset.txt'
 
