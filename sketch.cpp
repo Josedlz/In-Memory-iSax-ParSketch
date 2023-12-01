@@ -19,11 +19,11 @@ void printCandidates(vector<tuple<long, vector<float>, float>>& candidates) {
     }
 }
 int main() {
-    cout<<"aafdf";
-    int N = 100; 
-    int gridDimension = 2;
+    int N = 20; 
+    int gridDimension = 5;
     int cellSize = 10;
-    string datapath = "/home/luischahua/In-Memory-iSax-ParSketch/Dataset/datasets/synthetic/random_dataset/white_noise_dataset.txt";
+    //string datapath = "/home/luischahua/In-Memory-iSax-ParSketch/Dataset/datasets/synthetic/random_dataset/white_noise_dataset.txt";
+    string datapath = "/home/renatoseb/2023-2/eda/proyecto/In-Memory-iSax-ParSketch/Dataset/datasets/synthetic/random_dataset/white_noise_dataset.txt";
     ParSketch searcher(datapath, gridDimension, cellSize);
     vector<vector<float>> R = searcher.ranD(N, searcher.getData().size());
 
@@ -53,15 +53,12 @@ int main() {
         // Agrega el sketch asignado a la lista de sketches
         sketches.push_back(progrSketch);
     }
-    int threshold = 1;
+    int threshold = 0;
     float fraction = 10;
     int k = 3;
-    vector<float> queryTS = data[5];
-    cout<<"aa";
+    vector<float> queryTS = data[1];
     auto ans = searcher.search(queryTS, R, breakpoints, threshold, k ,fraction);
     printCandidates(ans);
-    
-
 
 
     return 0;
