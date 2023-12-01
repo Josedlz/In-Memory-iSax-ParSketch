@@ -33,6 +33,7 @@ int main()
     file.close();
     
     std::cout << "Searching for the 5 nearest neighbors of the first time series in the dataset" << std::endl;
+    /*
     auto result = searcher.search(test_time_series, 5);
     std::cout << "Search completed" << std::endl;
 
@@ -42,6 +43,6 @@ int main()
         }
         std::cout << std::endl;
     }
-
+    */
     return 0;
 }

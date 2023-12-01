@@ -1,4 +1,6 @@
 #include "TimeSeries.h"
+#include <iostream>
+#include <cmath>
 
 
 
@@ -33,9 +35,17 @@ void TimeSeries::getPAARepresentation(int wordLength) {
 
     this->breakpoints.resize(wordLength);
 
-    for (int i = 0; i < wordLength - 1; i++) {
+    for (int i = 0; i < wordLength; i++) {
         this->breakpoints[i] = 0 + int(this->values.size() / wordLength) * (i + 1);
     }
+
+    /*
+    std::cout << "Breakpoints: " << std::endl;
+    for (auto& breakpoint : this->breakpoints) {
+        std::cout << breakpoint << " ";
+    }
+    std::cout << std::endl;
+    */
 
     int currentIndexCurrentBucket = 0;
     int lastIndexPreviousBucket = 0;
@@ -50,6 +60,14 @@ void TimeSeries::getPAARepresentation(int wordLength) {
         this->paaRepresentation[segment] /= currentIndexCurrentBucket - lastIndexPreviousBucket + 1;
         lastIndexPreviousBucket = currentIndexCurrentBucket;
     }
+
+    /*
+    std::cout << "PAA: " << std::endl;
+    for (auto& paa : this->paaRepresentation) {
+        std::cout << paa << " ";
+    }
+    std::cout << std::endl;
+    */
 }
 
 void TimeSeries::getiSAXRepresentation(int wordLength, int cardinality) {
@@ -59,31 +77,34 @@ void TimeSeries::getiSAXRepresentation(int wordLength, int cardinality) {
 
     float range = max - min;
 
-    float step = range / (1<<cardinality);
+    float step = range / (cardinality);
 
     this->iSAXRepresentation.resize(wordLength, std::make_pair(0, cardinality));
 
     for (int i = 0; i < wordLength; i++) {
         auto PAA = this->paaRepresentation[i];
 
-        for (int j = 0; j < (1<<cardinality); j++) {
+        for (int j = 0; j < cardinality; j++) {
             if (PAA >= min + j * step && PAA <= min + (j + 1) * step) {
-                this->iSAXRepresentation[i] = std::make_pair(j, cardinality);
+                this->iSAXRepresentation[i] = std::make_pair(j, log2(cardinality));
                 break;
             }
         }
     }
+
+    /*
+    std::cout << "iSAX" << std::endl;
+    for (auto& isax : this->iSAXRepresentation) {
+        std::cout << isax.first << "(" << isax.second << ") ";
+    }
+    std::cout << std::endl;
+    */
 }
 
 std::vector<std::pair<int, int>> TimeSeries::tsToiSAX(int wordLength, int cardinality) {
 
     getPAARepresentation(wordLength);
     getiSAXRepresentation(wordLength, cardinality);
-
-
-    for (auto isax : this->iSAXRepresentation) {
-        this->iSAXRepresentation.emplace_back(isax.first, isax.second);
-    }
 
     return this->iSAXRepresentation;
 }

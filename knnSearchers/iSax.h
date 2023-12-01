@@ -11,7 +11,7 @@ class Node {
     private:
         int THRESHOLD = 5;
         int WORD_LENGTH = 4;
-        int CARDINALITY = 4;
+        int CARDINALITY = 16;
     public:
         std::vector<Node*> children;
         std::vector<TimeSeries> datapoints;
@@ -47,6 +47,8 @@ class Node {
         bool isLeaf(){
             return false;
         }
+        
+        void print(size_t indent = 0);
 
         virtual void insert(TimeSeries ts) = 0;
         
@@ -77,6 +79,7 @@ class Internal: public Node {
         ~Internal() = default;
 };
 
+
 class iSAXSearcher: public knnSearcher {
     private:
         Internal* root;
@@ -96,7 +99,10 @@ class iSAXSearcher: public knnSearcher {
         std::vector<TimeSeries> search(const std::vector<TimeSeries>& queries, int k) override;
         void insert(TimeSeries ts) override;
         void createIndex() override;
+
+        void print() const;
 };
+
 
 template <typename T>
 class indexablePQ {
