@@ -6,10 +6,13 @@ bool Node::covers(std::vector<iSAXSymbol> tsSymbols) {
     for (int i=0;i<tsSymbols.size();i++){
         int sy = tsSymbols[i].level;
         for (int j=tsSymbols[i].level;j>=0;j--){
-            if ((tsSymbols[i].symbol & (1<<j)) != (symbols[i].symbol & (1<<(sy)))){
+            int sim1 = (tsSymbols[i].symbol & (1<<j)) ? 1 : 0;
+            int sim2 = (symbols[i].symbol & (1<<(sy))) ? 1 : 0;
+            if (sim1 != sim2){
                 covered = false;
                 break;
             }
+            sy--;
         }
     }
     return covered; 
@@ -66,6 +69,15 @@ void Leaf::split (int turnSplit) {
         newChild1->parent = this;
         newChild0->symbols = newSymbols0;
         newChild1->symbols = newSymbols1;
+
+        // redistribuyo los datos
+        for (auto& ts: datapoints){
+            if (newChild0->covers(ts.tsToiSAX(3, 3))){
+                newChild0->insert(ts);
+            } else {
+                newChild1->insert(ts);
+            }
+        }
     }
 }
 
