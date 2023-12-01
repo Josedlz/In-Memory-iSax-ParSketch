@@ -77,7 +77,7 @@ class TimeSeries {
 
         std::vector<std::pair<int, int>> tsToiSAX(int wordLength, int segments);
 
-        int minDist(TimeSeries o, int wordLength, int segments);
+        int minDist(std::vector<iSAXSymbol> o, int maxWith, int segments);
 };
 
 

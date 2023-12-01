@@ -63,6 +63,7 @@ class iSAXSearcher: public knnSearcher {
         int maxCard;
         int dimension;
         int threshold;
+        int maxWidth;
     public:
         using knnSearcher::knnSearcher;
 
