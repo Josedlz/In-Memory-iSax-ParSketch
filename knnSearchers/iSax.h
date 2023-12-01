@@ -4,19 +4,6 @@
 #include "knnSearcher.h"
 #include "../TimeSeries/TimeSeries.h"
 
-class iSAXSymbol {
-    public:
-        int symbol;
-        int level;
-        iSAXSymbol(int symbol, int level){
-            this->symbol = symbol;
-            this->level = level;
-        }
-        iSAXSymbol() = default;
-        ~iSAXSymbol() = default;
-};
-
-
 class Node {
     public:
         std::vector<Node*> children;
