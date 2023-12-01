@@ -17,75 +17,39 @@ using namespace std;
 class ParSketchSearcher: public knnSearcher {
 private:
 // attributes
-std::vector<TimeSeries> series;
-int cellSize;
-int gridDimension;
+
 public:
-    using knnSearcher::knnSearcher;
+    ParSketchSearcher() = default;
     ~ParSketchSearcher() = default;
+    int cellSize;
+    int gridDimension;
+template <typename A>
+std::vector<A> mult(const std::vector<A>& a, const std::vector<std::vector<A>>& b) {
+    std::vector<A> result;
 
-    
-    
-    std::vector<TimeSeries> randomSample(vector<TimeSeries>& data, int L);
-    std::vector<TimeSeries> calculateBreakpoints(const std::vector<TimeSeries>& sampledData,
-                                                         const std::vector<std::vector<float>>& randomMatrix,
-                                                         int gridDimension);
-    void insert(TimeSeries t) override {
-        // Empty implementation
-    }
-
-    void createIndex() {
-    for (auto&ts: dataset){
-        series.push_back(ts);
-    }
-}  
-    void initialize(){
-        createIndex();
-    } 
-
-    std::vector<TimeSeries> search(TimeSeries q, int k) override{
-
-        
-    }
-
-    std::vector<TimeSeries> search(const std::vector<TimeSeries>& queries, int k) override {
-
-    }
-
-    std::vector<TimeSeries> getSeries(){
-        return this->series;
-    }
-
-TimeSeries mult(TimeSeries& a, vector<TimeSeries>& b) {
-    TimeSeries result;
-    vector<float> v;
-    for (auto& col : b) {
-        float sum = 0;
-        
-        for (std::size_t i = 0; i < a.getLength(); ++i) {
-            sum += a.getValues()[i] * col.getValues()[i];
+    for (const auto& col : b) {
+        A sum = 0;
+        for (std::size_t i = 0; i < a.size(); ++i) {
+            sum += a[i] * col[i];
         }
-        v.push_back(sum);
+        result.push_back(sum);
     }
-    result.setValues(v);
 
     return result;
 }
 
-std::vector<TimeSeries> ranD(int a, int b) {
-    std::vector<TimeSeries> result;
+std::vector<std::vector<float>> ranD(int a, int b) {
+    std::vector<std::vector<float>> result;
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> dis(-1.0, 1.0);
 
     for (int j = 0; j < a; ++j) {
-        TimeSeries row;
-        vector<float> v;
+        std::vector<float> row;
         for (int i = 0; i < b; ++i) {
             float randomValue = dis(gen);
-            v.push_back(randomValue);
+            row.push_back(randomValue);
         }
-        row.setValues(v);
         result.push_back(row);
     }
 
@@ -104,20 +68,20 @@ std::string getMinSec(long long millis) {
     return oss.str();
 }
 
-std::pair<float, float> stats(TimeSeries ts) {
+std::pair<float, float> stats(const std::vector<float>& ts) {
     float mean = 0.0f;
-    for (float x : ts.getValues()) {
+    for (float x : ts) {
         mean += x;
     }
-    mean /= ts.getLength();
+    mean /= ts.size();
 
     float sumSquareDiff = 0.0f;
-    for (float x : ts.getValues()) {
+    for (float x : ts) {
         float diff = x - mean;
         sumSquareDiff += diff * diff;
     }
 
-    float stdev = std::sqrt(sumSquareDiff / ts.getLength());
+    float stdev = std::sqrt(sumSquareDiff / ts.size());
 
     return std::make_pair(mean, stdev);
 }
@@ -178,7 +142,7 @@ std::vector<std::tuple<long, std::vector<float>, float>> mergeDistances(
     return rs;
 }
 
-/*std::vector<std::vector<int>> tsToSketch(const TSWithStats& tsWithStats, const std::vector<std::vector<float>>& RandMxBroad) {
+std::vector<std::vector<int>> tsToSketch(const TSWithStats& tsWithStats, const std::vector<std::vector<float>>& RandMxBroad) {
     const auto& ts = normalize(tsWithStats);
     auto multiplied = mult(ts, RandMxBroad);
  
@@ -239,71 +203,11 @@ std::vector<std::vector<int>> tsProgrSketch(const TSWithStats& tsWithStats,
     for (size_t i = 0; i <= result1.size() - gridDimension; i += gridDimension) {
         result.push_back(std::vector<int>(result1.begin() + i, result1.begin() + i + gridDimension));
     }
-    
+
 
     return result;
 }
 
-bool isSimilar(const std::vector<std::vector<int>>& sketch1, 
-               const std::vector<std::vector<int>>& sketch2, 
-               int threshold) {
-    // Verificar si los sketches tienen el mismo número de subvectores
-    if (sketch1.size() != sketch2.size()) {
-        return false;
-    }
-
-    int similarCount = 0;
-
-    // Iterar a través de cada subvector (celda de la cuadrícula) en los sketches
-    for (size_t i = 0; i < sketch1.size(); ++i) {
-        // Comparar los subvectores de ambos sketches
-        if (sketch1[i] == sketch2[i]) {
-            ++similarCount;
-        }
-    }
-
-    // Verificar si el número de celdas similares alcanza el umbral
-    return similarCount >= threshold;
-}
-
-
-std::vector<std::tuple<long, std::vector<float>, float>> search(const TSWithStats& queryTS, const std::vector<std::vector<float>>& RandMxBroad, 
-                                                                const std::vector<TSWithStats>& dataset, int threshold, 
-                                                                int k) {
-    // Convertir la serie temporal de consulta en un sketch
-    auto querySketch = tsToSketch(queryTS, RandMxBroad);
-
-    // Contenedor para los candidatos kNN
-    std::vector<std::tuple<long, std::vector<float>, float>> candidates;
-
-    // Iterar sobre el conjunto de datos
-    for (const auto& ts : dataset) {
-        // Convertir cada serie temporal del conjunto de datos en un sketch
-        auto dataSketch = tsToSketch(ts, RandMxBroad);
-
-        // Comparar el sketch de la consulta con el sketch de la serie temporal actual
-        if (isSimilar(querySketch, dataSketch, threshold)) {
-            // Calcular la distancia entre la consulta y la serie temporal actual
-            float dist = distance(queryTS, ts);
-
-            // Agregar a los candidatos con su ID, serie temporal y distancia
-            candidates.push_back(std::make_tuple(std::get<0>(ts), std::get<1>(ts), dist));
-        }
-    }
-
-    // Ordenar los candidatos por distancia
-    std::sort(candidates.begin(), candidates.end(), 
-              [](const auto& a, const auto& b) { return std::get<2>(a) < std::get<2>(b); });
-
-    // Conservar solo los k primeros candidatos
-    if (candidates.size() > k) {
-        candidates.resize(k);
-    }
-
-    return candidates;
-}
-
-*/
 };
 
 #endif

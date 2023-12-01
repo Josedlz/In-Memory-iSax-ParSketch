@@ -1,5 +1,6 @@
 #include "iSax.h"
 #include "../TimeSeries/TimeSeries.h"
+#include <queue>
 
 bool Node::covers(std::vector<iSAXSymbol> tsSymbols) {
     bool covered = true;
@@ -102,9 +103,33 @@ void Leaf::split (int turnSplit) {
 
 
 std::vector<TimeSeries> iSAXSearcher::search(TimeSeries q, int k) {
-    //root->search(q, k);
+    // best first search
+    std::vector<TimeSeries> result;
+    auto iSAXRepresentation = q.tsToiSAX(3, 3);
+    std::vector<iSAXSymbol> tsSymbols;
+    for (auto& p: iSAXRepresentation) {
+        tsSymbols.emplace_back(p.first, p.second);
+    }
+    std::priority_queue<std::pair<double, Node*>> candidates;
 
-    return std::vector<TimeSeries>();
+    candidates.push(std::make_pair(0, root));
+    while (!candidates.empty() && result.size() < k){
+        auto candidate = candidates.top();
+        candidates.pop();
+        if (candidate.second->isLeaf()){
+            for (auto& ts: candidate.second->datapoints){
+                result.push_back(ts);
+            }
+        } else {
+            for (auto& child: candidate.second->children){
+                if (child->covers(tsSymbols)){
+                    candidates.push(std::make_pair(q.minDist(child->symbols, maxWidth, dimension), child));
+                }
+            }
+        }
+    }
+    return result;
+
 }
 
 std::vector<TimeSeries> iSAXSearcher::search(const std::vector<TimeSeries>& queries, int k){

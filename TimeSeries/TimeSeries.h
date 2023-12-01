@@ -3,13 +3,11 @@
 
 #include <algorithm>
 #include <vector>
-#include <limits>
+#include <climits>
 
-std::vector<std::vector<double>> getDistanceMatrix(int alphabetSize){
 
-}
 
-/*class iSAXSymbol {
+class iSAXSymbol {
     public:
         int symbol;
         int level;
@@ -29,10 +27,10 @@ std::vector<std::vector<double>> getDistanceMatrix(int alphabetSize){
             }
 
             if (a.level == b.level) {
-                std::vector<std::vector<double>> distMat = getDistanceMatrix(1 << a.level);
+                std::vector<std::vector<double>> distMat; //= getDistanceMatrix(1 << a.level);
                 return distMat[a.symbol][b.symbol];
             } else {
-                std::vector<std::vector<double>> distMat = getDistanceMatrix(1 << b.level);
+                std::vector<std::vector<double>> distMat; //= getDistanceMatrix(1 << b.level);
                 int widthDiff = b.level - a.level;
                 int rsBLoad = b.symbol >> widthDiff;
                 if (a.symbol > rsBLoad) {
@@ -46,12 +44,10 @@ std::vector<std::vector<double>> getDistanceMatrix(int alphabetSize){
                 }
             }
         }
-
-        iSAXSymbol() = default;
         ~iSAXSymbol() = default;
 };
 
-*/
+
 class TimeSeries {
     private:
         int length;
@@ -81,7 +77,7 @@ class TimeSeries {
 
         std::vector<std::pair<int, int>> tsToiSAX(int wordLength, int segments);
 
-        int minDist(TimeSeries o, int wordLength, int segments);
+        int minDist(std::vector<iSAXSymbol> o, int maxWith, int segments);
 };
 
 

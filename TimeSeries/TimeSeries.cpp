@@ -1,6 +1,7 @@
 #include "TimeSeries.h"
 
 
+
 TimeSeries::TimeSeries(std::vector<float> values) {
     this->values = values;
     this->length = values.size();
@@ -87,17 +88,15 @@ std::vector<std::pair<int, int>> TimeSeries::tsToiSAX(int wordLength, int segmen
     return this->iSAXRepresentation;
 }
 
-int TimeSeries::minDist(TimeSeries o, int wordLength, int segments) {
-    auto thisiSAX = this->tsToiSAX(wordLength, segments);
-    auto oiSAX = o.tsToiSAX(wordLength, segments);
+int TimeSeries::minDist(std::vector<iSAXSymbol> o, int maxWith, int segments) {
+    auto thisiSAX = this->tsToiSAX(maxWith, segments);
 
     int dist = 0;
 
     for (int i = 0; i < segments; i++) {
-        double temp = iSAXSymbol(thisiSAX[i].first, thisiSAX[i].second).minDist(iSAXSymbol(oiSAX[i].first, oiSAX[i].second));
+        double temp = iSAXSymbol(thisiSAX[i].first, thisiSAX[i].second).minDist(o[i]);
         dist += temp * temp;
     }
 
     return dist;
 }
-
