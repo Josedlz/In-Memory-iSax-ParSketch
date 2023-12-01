@@ -1,28 +1,27 @@
 {
-    "configurations": [
-        {
-            "name": "Linux",
-            "includePath": [
-                "${workspaceFolder}/**",
-                "${workspaceFolder}/Dataset/**",
-                "${workspaceFolder}/knnSearchers/**",
-                "${workspaceFolder}/TimeSeries/**",
-                "/home/jose/anaconda3/include/",
-                "/usr/include/c++/11",           
-                "/usr/include/x86_64-linux-gnu/c++/11",
-                "/usr/include/c++/11/backward",
-                "/usr/lib/gcc/x86_64-linux-gnu/11/include",
-                "/usr/local/include",
-                "/usr/include/x86_64-linux-gnu",
-                "/usr/include"
-
-            ],
-            "defines": [],
-            "compilerPath": "/home/jose/anaconda3/bin/mpicc",
-            "cStandard": "c17",
-            "cppStandard": "gnu++17",
-            "intelliSenseMode": "linux-gcc-x64"
-        }
-    ],
-    "version": 4
+  "configurations": [
+    {
+      "name": "linux-clang-x64",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/Dataset/**",
+        "${workspaceFolder}/knnSearchers/**",
+        "${workspaceFolder}/TimeSeries/**",
+        "/home/jose/anaconda3/include/",
+        "/usr/include/c++/11",
+        "/usr/include/x86_64-linux-gnu/c++/11",
+        "/usr/include/c++/11/backward",
+        "/usr/lib/gcc/x86_64-linux-gnu/11/include",
+        "/usr/local/include",
+        "/usr/include/x86_64-linux-gnu",
+        "/usr/include"
+      ],
+      "defines": [],
+      "compilerPath": "/home/jose/anaconda3/bin/mpicc",
+      "cStandard": "c17",
+      "cppStandard": "gnu++17",
+      "intelliSenseMode": "linux-clang-x64"
+    }
+  ],
+  "version": 4
 }

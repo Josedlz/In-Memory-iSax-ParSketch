@@ -9,7 +9,7 @@ std::vector<std::vector<double>> getDistanceMatrix(int alphabetSize){
 
 }
 
-class iSAXSymbol {
+/*class iSAXSymbol {
     public:
         int symbol;
         int level;
@@ -51,7 +51,7 @@ class iSAXSymbol {
         ~iSAXSymbol() = default;
 };
 
-
+*/
 class TimeSeries {
     private:
         int length;

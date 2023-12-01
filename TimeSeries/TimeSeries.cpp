@@ -100,3 +100,4 @@ int TimeSeries::minDist(TimeSeries o, int wordLength, int segments) {
 
     return dist;
 }
+
