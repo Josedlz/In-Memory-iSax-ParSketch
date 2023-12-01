@@ -13,7 +13,6 @@ using namespace std;
 
 class ParSketch {
    private:
-
         vector<vector<float>> dataset;
         int cellSize;
         int gridDimension;
@@ -32,18 +31,18 @@ class ParSketch {
                                                  vector<vector<float>>& breakpoints, int threshold, int k, float fraction) {
     
     // Normaliza la serie temporal de consulta
-    auto normalizedQueryTS = normalize(queryTS);
+    // auto normalizedQueryTS = normalize(queryTS);
 
     // Calcula el sketch para la serie temporal de consulta normalizada
-    auto querySketch = tsToSketch(normalizedQueryTS, RandMxBroad);
+    auto querySketch = tsToSketch(queryTS, RandMxBroad);
 
     // Asigna el sketch a las celdas de la cuadrícula utilizando los breakpoints
     auto progrSketch = tsProgrSketch(queryTS, RandMxBroad, breakpoints);
-    cout<<"nepe";
     // Lista para almacenar los candidatos
     vector<tuple<long, vector<float>, float>> candidates;
 
     // Itera sobre el conjunto de datos
+    cout << "Dataset size: " << this->dataset.size() << endl;
     for (size_t i = 0; i < this->dataset.size(); ++i) {
         auto ts = this->dataset[i];
 
@@ -59,10 +58,11 @@ class ParSketch {
             candidates.emplace_back(i, ts, dist);
         }
     }
-
+    cout << "Candidates size: " << candidates.size() << endl;
     // Filtrado de candidatos usando la fracción y la consulta SELECT (simulado)
     int requiredMatches = static_cast<int>(fraction * progrSketch.size());
     vector<tuple<long, vector<float>, float>> filteredCandidates;
+    cout << "Required matches: " << requiredMatches << endl;
 
     // Filtra los candidatos que cumplen con la fracción requerida
     for (const auto& candidate : candidates) {
@@ -70,11 +70,14 @@ class ParSketch {
         auto dataSketch = tsToSketch(ts, RandMxBroad);
 
         int matches = countMatches(progrSketch, dataSketch);
+        if(matches != 0)
+            cout << "Matches: " << matches << endl;
         if (matches >= requiredMatches) {
             filteredCandidates.push_back(candidate);
         }
     }
-
+    cout << "Filtered candidates size: " << filteredCandidates.size() << endl;
+    
     // Ordena los candidatos por distancia
     std::sort(filteredCandidates.begin(), filteredCandidates.end(),
               [](const auto& a, const auto& b) { return get<2>(a) < get<2>(b); });
