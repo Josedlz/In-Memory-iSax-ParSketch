@@ -32,10 +32,10 @@ public:
                                                      vector<vector<float>> &breakpoints, int threshold, int k, float fraction)
     {
 
-        // Normaliza la serie temporal de consulta
+        // Normalizamos la serie temporal de consulta
         // auto normalizedQueryTS = normalize(queryTS);
 
-        // Calcula el sketch para la serie temporal de consulta normalizada
+        // Calculamos el sketch para la serie temporal de consulta normalizada
         auto querySketch = tsToSketch(queryTS, RandMxBroad);
         cout << "Query sketch: " << endl;
         for (auto &i : querySketch)
@@ -47,37 +47,36 @@ public:
             cout << endl;
         }
 
-        // Asigna el sketch a las celdas de la cuadrícula utilizando los breakpoints
+        // Asignamos el sketch a las celdas de la cuadrícula utilizando los breakpoints
         auto progrSketch = tsProgrSketch(queryTS, RandMxBroad, breakpoints);
-        // Lista para almacenar los candidatos
         vector<tuple<long, vector<float>, float>> candidates;
 
-        // Itera sobre el conjunto de datos
+        // Iteramos sobre el conjunto de datos
         cout << "Dataset size: " << this->dataset.size() << endl;
         for (size_t i = 0; i < this->dataset.size(); ++i)
         {
             auto ts = this->dataset[i];
 
-            // Calcula el sketch para la serie temporal actual en el conjunto de datos
+            // Calculamos el sketch para la serie temporal actual en el conjunto de datos
             auto dataSketch = tsToSketch(ts, RandMxBroad);
 
-            // Verifica la similitud entre el sketch de la consulta y el sketch de la serie temporal actual
+            // Verificamos la similitud entre el sketch de la consulta y el sketch de la serie temporal actual
             if (isSimilar(progrSketch, dataSketch, threshold))
             {
-                // Calcula la distancia entre la serie temporal de consulta y la serie temporal actual
+                // Calculamos la distancia entre la serie temporal de consulta y la serie temporal actual
                 float dist = distancia(queryTS, ts);
 
-                // Agrega la serie temporal actual a la lista de candidatos
+                // Agregamos la serie temporal actual a la lista de candidatos
                 candidates.emplace_back(i, ts, dist);
             }
         }
         cout << "Candidates size: " << candidates.size() << endl;
-        // Filtrado de candidatos usando la fracción y la consulta SELECT (simulado)
+        // Filtramos los candidatos usando la fracción y la consulta SELECT (simulado)
         int requiredMatches = static_cast<int>(fraction * progrSketch.size());
         vector<tuple<long, vector<float>, float>> filteredCandidates;
         cout << "Required matches: " << requiredMatches << endl;
 
-        // Filtra los candidatos que cumplen con la fracción requerida
+        // Filtramos los candidatos que cumplen con la fracción requerida
         for (const auto &candidate : candidates)
         {
             auto ts = get<1>(candidate);
@@ -92,12 +91,12 @@ public:
         }
         cout << "Filtered candidates size: " << filteredCandidates.size() << endl;
 
-        // Ordena los candidatos por distancia
+        // Ordenamos los candidatos por distancia
         std::sort(filteredCandidates.begin(), filteredCandidates.end(),
                   [](const auto &a, const auto &b)
                   { return get<2>(a) < get<2>(b); });
 
-        // Conserva solo los k primeros candidatos
+        // Conservamos solo los k primeros candidatos
         if (filteredCandidates.size() > k)
         {
             filteredCandidates.resize(k);
@@ -105,7 +104,7 @@ public:
         return filteredCandidates;
     }
 
-    // Función para contar coincidencias entre dos sketches
+    // Funcion para contar coincidencias entre dos sketches
     int countMatches(const vector<vector<int>> &sketch1, const vector<vector<int>> &sketch2)
     {
         int matches = 0;
@@ -123,14 +122,14 @@ public:
 
     vector<std::vector<float>> transpose(vector<vector<float>> &matrix)
     {
-        // Obtener las dimensiones de la matriz original
+        // Obtenemos las dimensiones de la matriz original
         size_t rows = matrix.size();
         size_t cols = matrix[0].size();
 
-        // Inicializar la matriz transpuesta con las dimensiones intercambiadas
+        // Inicializamos la matriz transpuesta con las dimensiones intercambiadas
         vector<std::vector<float>> result(cols, std::vector<float>(rows, 0.0));
 
-        // Llenar la matriz transpuesta
+        // Llenamos la matriz transpuesta
         for (size_t i = 0; i < rows; ++i)
         {
             for (size_t j = 0; j < cols; ++j)
@@ -143,7 +142,7 @@ public:
     }
     vector<vector<int>> tsToSketch(vector<float> &ts, vector<vector<float>> &RandMxBroad)
     {
-        auto normalizedTs = normalize(ts); // Debes implementar la función normalize
+        auto normalizedTs = normalize(ts); 
 
         auto multiplied = mult(normalizedTs, RandMxBroad);
 
@@ -167,7 +166,7 @@ public:
 
     vector<float> normalize(vector<float> &inputVector)
     {
-        // Calcular la media del vector
+        // Calculamos la media del vector
         float sum = 0.0f;
         for (float value : inputVector)
         {
@@ -175,7 +174,7 @@ public:
         }
         float mean = sum / inputVector.size();
 
-        // Calcular la desviación estándar del vector
+        // Calculamos la desviación estándar del vector
         sum = 0.0f;
         for (float value : inputVector)
         {
@@ -184,13 +183,13 @@ public:
         }
         float stdev = std::sqrt(sum / inputVector.size());
 
-        // Normalizar el vector
+        // Normalizamos el vector
         std::vector<float> normalizedVector;
         normalizedVector.reserve(inputVector.size());
 
         for (float value : inputVector)
         {
-            // Normalizar utilizando z-score (media = 0, desviación estándar = 1)
+            // Normalizamos utilizando z-score (media = 0, desviación estándar = 1)
             float normalizedValue = (stdev > 0.000001) ? (value - mean) / stdev : 0.0f;
             normalizedVector.push_back(normalizedValue);
         }
@@ -200,7 +199,7 @@ public:
 
     vector<vector<int>> tsProgrSketch(vector<float> &ts, vector<vector<float>> &RandMxBroad, vector<vector<float>> &breakpoints)
     {
-        auto normalizedTs = normalize(ts); // Debes implementar la función normalize
+        auto normalizedTs = normalize(ts); 
         auto multiplied = mult(normalizedTs, RandMxBroad);
 
         vector<pair<double, size_t>> zipped;
@@ -228,7 +227,7 @@ public:
         {
             if (value == -1)
             {
-                // If v == -1, use the length of the first breakpoint vector - 1
+                // Si v == -1 usamos la longitud del primer vector de breakpoints
                 result1.push_back(breakpoints[0].size() - 1);
             }
             else
@@ -248,21 +247,21 @@ public:
     }
     std::vector<vector<float>> createBreakpoints(vector<vector<float>> &sampleProject, int gridSize)
     {
-        // Transponer la matriz para trabajar con las dimensiones como columnas
+        // Transponemos la matriz para trabajar con las dimensiones como columnas
         vector<vector<float>> sampleProjectTransposed = transpose(sampleProject);
 
-        // Calcular el tamaño de cada segmento en la proyección
+        // Calculamos el tamaño de cada segmento en la proyección
         int segmentSize = sampleProjectTransposed[0].size() / gridSize;
 
-        // Calcular los breakpoints para cada dimensión en la proyección
+        // Calculamos los breakpoints para cada dimensión en la proyección
         std::vector<vector<float>> breakpoints;
         for (auto &dimension : sampleProjectTransposed)
         {
-            // Tomar una porción del array y ordenar
+            // Tomamos una porción del array y ordenar
             std::vector<float> sortedDimension(dimension.begin(), dimension.end());
             std::sort(sortedDimension.begin(), sortedDimension.end());
 
-            // Crear un array de breakpoints tomando el último elemento de cada segmento
+            // Creamos un array de breakpoints tomando el último elemento de cada segmento
             std::vector<float> dimensionBreakpoints;
             for (int i = 0; i < gridSize; ++i)
             {
@@ -382,7 +381,7 @@ public:
                    vector<vector<int>> &sketch2,
                    int threshold)
     {
-        // Verificar si los sketches tienen el mismo número de subvectores
+        // Verificamos si los sketches tienen el mismo número de subvectores
         if (sketch1.size() != sketch2.size())
         {
             return false;
@@ -390,23 +389,23 @@ public:
 
         int similarCount = 0;
 
-        // Iterar a través de cada subvector (celda de la cuadrícula) en los sketches
+        // Iteramos a través de cada subvector (celda de la cuadrícula) en los sketches
         for (size_t i = 0; i < sketch1.size(); ++i)
         {
-            // Comparar los subvectores de ambos sketches
+            // Comparamos los subvectores de ambos sketches
             if (sketch1[i] == sketch2[i])
             {
                 ++similarCount;
             }
         }
 
-        // Verificar si el número de celdas similares alcanza el umbral
+        // Verificamos si el número de celdas similares alcanza el umbral
         return similarCount >= threshold;
     }
 
     float distancia(vector<float> &vector1, vector<float> &vector2)
     {
-        // Verificar si los vectores tienen la misma longitud
+        // Verificamos si los vectores tienen la misma longitud
         if (vector1.size() != vector2.size())
         {
             throw std::invalid_argument("Los vectores deben tener la misma longitud");
@@ -421,7 +420,7 @@ public:
             distanceSquared += std::pow(diff, 2);
         }
 
-        // Calcular la raíz cuadrada de la suma
+        // Calculamos la raíz cuadrada de la suma
         return sqrt(distanceSquared);
     }
     vector<tuple<long, vector<float>, float>> mergeDistances(

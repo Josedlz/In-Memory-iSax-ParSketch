@@ -12,7 +12,6 @@ chunk_size = num_series // 30  # Number of time series to process at a time
 
 path_to_save = '../fourier_slice/fourier_slice_dataset.txt'
 
-# Open a file to save the dataset
 with open(path_to_save, 'w') as file:
     for _ in range(num_series // chunk_size):
         # Initialize frequency spectra
@@ -33,7 +32,6 @@ with open(path_to_save, 'w') as file:
         # Add white noise
         time_series_batch += np.random.normal(0, 1, time_series_batch.shape)
 
-        # Write the batch to the file
         for series in time_series_batch:
             series_str = ' '.join(map(str, series))
             file.write(series_str + '\n')

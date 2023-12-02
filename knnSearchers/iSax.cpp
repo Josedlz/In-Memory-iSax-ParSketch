@@ -214,14 +214,10 @@ std::vector<TimeSeries> iSAXSearcher::search(TimeSeries q, int k) {
                     std::cout << s.symbol << "(" << s.level << ") ";
                 }
                 std::cout << "\nDoes child cover? " << child->covers(word) << std::endl;
-                /*
                 if (child->covers(word) or candidate.second->isRoot()){
                     std::cout << "Found child that covers" << std::endl;
                     candidates.push(std::make_pair(q.minDist(child->symbols, cardinality, wordLength), child));
                 }
-                */
-                std::cout << "Found child that covers" << std::endl;
-                candidates.push(std::make_pair(q.minDist(child->symbols, cardinality, wordLength), child));
             }
         }
     }

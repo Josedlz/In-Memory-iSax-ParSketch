@@ -4,11 +4,10 @@
 DPiSAX::DPiSAX(std::string filename) {
     // Initialize MPI
     MPI_Init(nullptr, nullptr);
-    // Additional DPiSAX-specific setup, like determining dataset partitions
+    //TODO
 }
 
 DPiSAX::~DPiSAX() {
-    // Finalize MPI
     MPI_Finalize();
 }
 
