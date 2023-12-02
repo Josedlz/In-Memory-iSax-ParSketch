@@ -6,12 +6,11 @@
 #include "knnSearcher.h"
 #include "../TimeSeries/TimeSeries.h"
 
-
 class Node {
     private:
         int THRESHOLD = 5;
-        int WORD_LENGTH = 4;
-        int CARDINALITY = 16;
+        int WORD_LENGTH = 20;
+        int CARDINALITY = 4;
     public:
         std::vector<Node*> children;
         std::vector<TimeSeries> datapoints;
@@ -79,7 +78,6 @@ class Internal: public Node {
         ~Internal() = default;
 };
 
-
 class iSAXSearcher: public knnSearcher {
     private:
         Internal* root;
@@ -102,7 +100,6 @@ class iSAXSearcher: public knnSearcher {
 
         void print() const;
 };
-
 
 template <typename T>
 class indexablePQ {

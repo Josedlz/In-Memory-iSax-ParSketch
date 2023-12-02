@@ -16,13 +16,14 @@ std::string toBinary(int symbol, int level) {
 bool Node::covers(std::vector<iSAXSymbol> tsSymbols) {
     std::cout << "Checking if node covers" << std::endl;
 
-    std::cout << "symbols: " << std::endl;
+
+    std::cout << "Node symbols: " << std::endl;
     for (auto& p: symbols) {
         std::cout << toBinary(p.symbol, p.level) << "(" << p.level << ") ";
     }
     std::cout << std::endl;
 
-    std::cout << "tsSymbols: " << std::endl;
+    std::cout << "TimeSeries symbols: " << std::endl;
     for (auto& p: tsSymbols) {
         std::cout << toBinary(p.symbol, p.level) << "(" << p.level << ") ";
     }
@@ -30,8 +31,8 @@ bool Node::covers(std::vector<iSAXSymbol> tsSymbols) {
 
     
     for (int i=0;i<tsSymbols.size();i++){
-        int sy = tsSymbols[i].level;
-        for (int j=symbols[i].level;j>=0;j--){
+        int sy = tsSymbols[i].level; // 4
+        for (int j=symbols[i].level;j>=1;j--){ 
             int sim1 = (tsSymbols[i].symbol & (1<<(sy-1))) ? 1 : 0;
             int sim2 = (symbols[i].symbol & (1<<(j-1))) ? 1 : 0;
             if (sim1 != sim2){
@@ -60,7 +61,7 @@ void Internal::insert(TimeSeries ts){
         tsSymbols.emplace_back(p.first, p.second);
     }
     if(isRoot()){
-        std::cout << "We are in the root" << std::endl;
+        std::cout << "Inserting in the root" << std::endl;
         std::vector<iSAXSymbol> pref;
         for (int i=0; i < tsSymbols.size(); i++){
             pref.push_back(iSAXSymbol((tsSymbols[i].symbol>>(tsSymbols[i].level-1))&1, 1));
@@ -80,7 +81,7 @@ void Internal::insert(TimeSeries ts){
             newLeaf->parent = this;
         }
     } else {
-        std::cout << "We are in an internal node" << std::endl;
+        std::cout << "Inserting in an internal node" << std::endl;
         bool inserted = false;
         for (int i=0;i<children.size();i++){
             if (children[i]->covers(tsSymbols)){
@@ -113,8 +114,13 @@ void Leaf::split (int turnSplit) {
         auto& my_parents_children = this->parent->children;
         auto it = std::find(my_parents_children.begin(), my_parents_children.end(), this);
         if (it != my_parents_children.end()) {
+            std::cout << "Do I delete it?" << std:: endl;
             my_parents_children.erase(it);  
+            std::cout << reinterpret_cast<uintptr_t>(this) << std::endl;
+
+            std::cout << reinterpret_cast<uintptr_t>(*it) << std::endl;
         }
+        
 
         Internal* newNode = new Internal();
 
@@ -134,13 +140,11 @@ void Leaf::split (int turnSplit) {
         newChild1->parent = newNode;
         newChild0->symbols = newSymbols0;
         newChild1->symbols = newSymbols1;
-        newNode->children.push_back(newChild0);
-        newNode->children.push_back(newChild1);
 
         // redistribuyo los datos
         for (auto& ts: datapoints){
             std::vector<iSAXSymbol> tsSymbols;
-            auto iSAXRepresentation = ts.tsToiSAX(4, 4);
+            auto iSAXRepresentation = ts.tsToiSAX(20, 4);
 
             for (auto& p: iSAXRepresentation) {
                 tsSymbols.emplace_back(p.first, p.second);
@@ -152,6 +156,9 @@ void Leaf::split (int turnSplit) {
             }
         }
 
+        newNode->children.push_back(newChild0);
+        newNode->children.push_back(newChild1);
+
         my_parents_children.push_back(newNode);
 
         delete this; 
@@ -161,7 +168,7 @@ void Leaf::split (int turnSplit) {
 std::vector<TimeSeries> iSAXSearcher::search(TimeSeries q, int k) {
     // best first search
     indexablePQ<TimeSeries> result(k);
-    auto iSAXRepresentation = q.tsToiSAX(4, 16);
+    auto iSAXRepresentation = q.tsToiSAX(20, 4);
     std::vector<iSAXSymbol> word;
 
     for (auto& p: iSAXRepresentation) {
@@ -206,11 +213,15 @@ std::vector<TimeSeries> iSAXSearcher::search(TimeSeries q, int k) {
                 for (auto& s: childSymbols){
                     std::cout << s.symbol << "(" << s.level << ") ";
                 }
-                std::cout << "\nDoes child" "cover? " << child->covers(word) << std::endl;
+                std::cout << "\nDoes child cover? " << child->covers(word) << std::endl;
+                /*
                 if (child->covers(word) or candidate.second->isRoot()){
                     std::cout << "Found child that covers" << std::endl;
                     candidates.push(std::make_pair(q.minDist(child->symbols, cardinality, wordLength), child));
                 }
+                */
+                std::cout << "Found child that covers" << std::endl;
+                candidates.push(std::make_pair(q.minDist(child->symbols, cardinality, wordLength), child));
             }
         }
     }
