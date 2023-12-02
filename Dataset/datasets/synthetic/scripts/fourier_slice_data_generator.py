@@ -14,10 +14,10 @@ path_to_save = '../fourier_slice/fourier_slice_dataset.txt'
 
 with open(path_to_save, 'w') as file:
     for _ in range(num_series // chunk_size):
-        # Initialize frequency spectra
+        # We initialize frequency spectra
         spectra = np.zeros((chunk_size, time_points), dtype=complex)
 
-        # Assign amplitudes and random phase shifts
+        # We assign amplitudes and random phase shifts
         for i in range(chunk_size):
             high_freq_range = slice(y, y + x)
             low_freq_range1 = slice(0, y)
@@ -29,7 +29,7 @@ with open(path_to_save, 'w') as file:
         # Inverse Fourier transform to generate time series
         time_series_batch = scipy.fftpack.ifft(spectra).real
 
-        # Add white noise
+        # We add white noise
         time_series_batch += np.random.normal(0, 1, time_series_batch.shape)
 
         for series in time_series_batch:
