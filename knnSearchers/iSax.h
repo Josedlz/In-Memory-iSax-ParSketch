@@ -2,85 +2,110 @@
 #define ISAX_H
 
 #include <limits>
-
 #include "knnSearcher.h"
 #include "../TimeSeries/TimeSeries.h"
+#include "config.h"
+#include "utils.h"
 
 class Node {
-    private:
-        int THRESHOLD = 5;
-        int WORD_LENGTH = 20;
-        int CARDINALITY = 4;
+    protected:
     public:
-        std::vector<Node*> children;
-        std::vector<TimeSeries> datapoints;
-        std::vector<iSAXSymbol> symbols;
-        int turnSplit = 0;
-        //int maxCard;
-        int wordLength;
-        int threshold;
-        int cardinality;
-        Node* parent;
+        virtual std::vector<iSAXSymbol> insert(TimeSeries ts) = 0;
 
-        Node() {
-            this->threshold = THRESHOLD;
-            this->wordLength = WORD_LENGTH;
-            this->cardinality = CARDINALITY;
+        virtual TimeSeries search(TimeSeries& ts) const = 0;
 
-            this->symbols.resize(wordLength, iSAXSymbol(0, cardinality));
-        };
+        virtual bool covers(std::vector<iSAXSymbol>& tsSymbols) const = 0; 
 
-        Node(TimeSeries ts, std::vector<iSAXSymbol> nodeSymbols) {
-            this->threshold = THRESHOLD;
-            this->wordLength = WORD_LENGTH;
-            this->cardinality = CARDINALITY;
+        virtual bool isRoot() = 0;
 
-            this->symbols = nodeSymbols;
-
-            this->datapoints.push_back(ts);
-        } 
-
-        bool isRoot(){
-            return parent == nullptr;
-        }
-        bool isLeaf(){
-            return false;
-        }
-        
-        void print(size_t indent = 0);
-
-        virtual void insert(TimeSeries ts) = 0;
-        
-        bool covers(std::vector<iSAXSymbol> tsSymbols);
+        virtual bool isLeaf() = 0;
 
         virtual ~Node() = default;
 };
 
-class Leaf: public Node {
+class Root: public Node {
+    std::vector<Leaf*> children;
+    std::vector<iSAXSymbol> prefix;
+    int turnSplit = 0;
     public:
-        using Node::Node;
-        bool isLeaf(){
+        explicit Root() {
+            children.resize(1 << WORD_LENGTH, nullptr);
+        }
+        std::vector<iSAXSymbol> insert(TimeSeries ts) override;
+        TimeSeries search(TimeSeries& ts) const override;
+
+        bool covers(std::vector<iSAXSymbol>& tsSymbols) const override;
+
+        bool isRoot() override {
             return true;
         }
 
-        void insert(TimeSeries ts) override;
-        void split (int turnSplit);
+        bool isLeaf() override {
+            return false;
+        }
+
+        ~Root();
+};
+
+class Internal: public Node {
+    Node* leftChild;
+    Node* rightChild;
+    std::vector<iSAXSymbol> prefix;
+    int turnSplit = 0;
+
+    public:
+
+        //explicit Internal(std::vector<iSAXSymbol> prefix) : prefix(prefix), leftChild(nullptr), rightChild(nullptr) {}
+        explicit Internal(std::vector<iSAXSymbol> prefix, Node* left, Node* right) : prefix(prefix), leftChild(left), rightChild(right) {}
+
+        std::vector<iSAXSymbol> insert(TimeSeries ts) override;
+        TimeSeries search(TimeSeries& ts) const override;
+
+        bool covers(std::vector<iSAXSymbol>& tsSymbols) const override;
+
+        bool isRoot() override {
+            return false;
+        }
+
+        bool isLeaf() override {
+            return false;
+        }
+
+        ~Internal();
+};
+
+class Leaf: public Node {
+    std::vector<TimeSeries> data;
+    std::vector<iSAXSymbol> prefix;
+
+    int M;
+    int turnSplit = 0;
+
+    public:
+        explicit Leaf(std::vector<iSAXSymbol> prefix) : prefix(prefix) {
+            M = THRESHOLD;
+        }
+
+        std::vector<iSAXSymbol> insert(TimeSeries ts) override;
+        std::vector<iSAXSymbol> split (int turnSplit);
+        TimeSeries search(TimeSeries& ts) const override;
+
+        bool covers(std::vector<iSAXSymbol>& tsSymbols) const override;
+
+        bool isRoot() override {
+            return false;
+        }
+
+        bool isLeaf() override {
+            return true;
+        }
 
         ~Leaf() = default;
 };
 
-class Internal: public Node {
-    public:
-        using Node::Node;
-
-        void insert(TimeSeries ts) override;
-
-        ~Internal() = default;
-};
-
 class iSAXSearcher: public knnSearcher {
     private:
-        Internal* root;
+        Root* root;
         int maxCard;
         int wordLength;
         int threshold;
@@ -88,76 +113,18 @@ class iSAXSearcher: public knnSearcher {
     public:
 
         iSAXSearcher(std::string filename) : knnSearcher(filename) {
-            this->root = new Internal();
+            this->root = new Root();
         }
 
-        ~iSAXSearcher() = default;
+        ~iSAXSearcher() {
+            delete root;
+        };
 
         std::vector<TimeSeries> search(TimeSeries q, int k) override;
         std::vector<TimeSeries> search(const std::vector<TimeSeries>& queries, int k) override;
         void insert(TimeSeries ts) override;
         void createIndex() override;
 
-        void print() const;
-};
-
-template <typename T>
-class indexablePQ {
-    private:
-        std::vector<std::pair<double, T>> sortedList;
-        int k = 0; 
-    public:
-        indexablePQ(int sz) {
-            this->k = sz;
-          this->sortedList.resize(sz, std::make_pair(std::numeric_limits<double>::infinity(), T()));
-        }
-
-        std::pair<double, T> top() {
-            return sortedList.front();
-        }
-
-        void push(std::pair<double, T> p) {
-            // Custom comparator that compares only the first elements of the pairs
-            auto comp = [](const std::pair<double, T>& a, const std::pair<double, T>& b) {
-                return a.first < b.first;
-            };
-
-            // Find the position to insert using binary search
-            auto it = std::lower_bound(sortedList.begin(), sortedList.end(), p, comp);
-  
-            // If the vector is not full yet, append a placeholder at the end
-            if (sortedList.size() < k) {
-                sortedList.emplace_back();
-            }
-  
-            // Determine the starting point for shifting elements to the right
-            auto shiftStart = std::distance(sortedList.begin(), it);
-            // Shift elements to the right to make space for the new element
-            for (size_t i = std::min(int(sortedList.size() - 1), int(k - 1)); i > shiftStart; --i) {
-                sortedList[i] = sortedList[i - 1];
-            }
-  
-            // Insert the new element
-            *it = p;
-        }
-
-       std::pair<double, T>  operator[](int index) {
-            return this->sortedList[index];
-        }
-
-        int size() {
-            return sortedList.size();
-        }
-
-        typename std::vector<std::pair<double, T>>::iterator begin() {
-            return sortedList.begin();
-        }
-        
-        typename std::vector<std::pair<double, T>>::iterator end() {
-            return sortedList.end();
-        }
-
-        ~indexablePQ() = default;
 };
 
 #endif

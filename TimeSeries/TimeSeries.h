@@ -5,17 +5,17 @@
 #include <vector>
 #include <climits>
 
-
-
 class iSAXSymbol {
     public:
         int symbol;
         int level;
+
         iSAXSymbol() = default;
         iSAXSymbol(int symbol, int level){
             this->symbol = symbol;
             this->level = level;
         }
+
         double minDist(iSAXSymbol o) {
             iSAXSymbol a, b;
             if (level < o.level) {
@@ -75,7 +75,7 @@ class TimeSeries {
         std::vector <float>::iterator begin();
         std::vector <float>::iterator end();
 
-        std::vector<std::pair<int, int>> tsToiSAX(int cardinality, int wordLength);
+        std::vector<std::pair<int, int>> tsToiSAX(int wordLength, int cardinality);
 
         int minDist(std::vector<iSAXSymbol> o, int maxWith, int wordLength);
 
