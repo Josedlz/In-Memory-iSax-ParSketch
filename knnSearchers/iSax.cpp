@@ -224,6 +224,21 @@ std::pair<Node*, Node*> Leaf::split (int turnSplit) {
     return std::make_pair(nullptr, nullptr);
 }
 
+TimeSeries Leaf::search(TimeSeries& ts) const {
+    TimeSeries bestMatch;
+    double bestDist = std::numeric_limits<double>::max();
+
+    for (auto& ts2: data){
+        double dist = ts.euclideanDist(ts2);
+        if (dist < bestDist){
+            bestDist = dist;
+            bestMatch = ts2;
+        }
+    }
+
+    return bestMatch;
+}
+
 /*
 std::vector<TimeSeries> iSAXSearcher::search(TimeSeries q, int k) {
     // best first search
