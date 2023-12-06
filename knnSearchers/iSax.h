@@ -61,12 +61,12 @@ class Root: public Node {
 };
 
 class Internal: public Node {
-    Node* leftChild;
-    Node* rightChild;
     std::vector<iSAXSymbol> prefix;
     int turnSplit;
 
     public:
+        Node* leftChild;
+        Node* rightChild;
 
         //explicit Internal(std::vector<iSAXSymbol> prefix) : prefix(prefix), leftChild(nullptr), rightChild(nullptr) {}
         explicit Internal(std::vector<iSAXSymbol> prefix, Node* left, Node* right, int turnSplit) : prefix(prefix), leftChild(left), rightChild(right), turnSplit(turnSplit) {}
@@ -129,6 +129,10 @@ class Leaf: public Node {
         std::vector<iSAXSymbol> getPrefix() override {
             return prefix;
         }
+
+        std::vector<TimeSeries> getData() {
+            return data;
+        }   
 
         ~Leaf() = default;
 };

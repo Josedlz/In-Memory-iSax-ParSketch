@@ -239,10 +239,10 @@ TimeSeries Leaf::search(TimeSeries& ts) const {
     return bestMatch;
 }
 
-/*
 std::vector<TimeSeries> iSAXSearcher::search(TimeSeries q, int k) {
     // best first search
     indexablePQ<TimeSeries> result(k);
+
     auto iSAXRepresentation = q.tsToiSAX(WORD_LENGTH, CARDINALITY);
     std::vector<iSAXSymbol> word;
 
@@ -256,34 +256,25 @@ std::vector<TimeSeries> iSAXSearcher::search(TimeSeries q, int k) {
     
 
     while (!candidates.empty()){
-        std::cout << "In loop" << std::endl;
         auto candidate = candidates.top();
         candidates.pop();
-
-        std::cout << "Candidate: " << candidate.first << std::endl;        
-        std::cout << "Result kth: " << result[k-1].first << std::endl;
 
         if (candidate.first > result[k-1].first){
             break;
         }
 
         if (candidate.second->isLeaf()){
-            std::cout << "We are in a leaf" << std::endl;
-            for (auto& ts: candidate.second->datapoints){
+            for (auto& ts: static_cast<Leaf*>(candidate.second)->getData()){
                 if (q.euclideanDist(ts) < result[k-1].first){
                     result.push(std::make_pair(q.euclideanDist(ts), ts));
                 }
             }
-            std::cout << "Result so far:" << std::endl;
-            for (auto& p: result){
-                std::cout << p.first << " ";
-            }
-            std::cout << std::endl;
 
         } else {
-            for (auto& child: candidate.second->children){
+            std::vector<Node*> children = {static_cast<Internal*>(candidate.second)->leftChild, static_cast<Internal*>(candidate.second)->rightChild};
+            for (auto& child: children){
                 if (child->covers(word) or candidate.second->isRoot()){
-                    candidates.push(std::make_pair(q.minDist(child->isax_word, cardinality, wordLength), child));
+                    candidates.push(std::make_pair(q.minDist(child->getPrefix(), cardinality, wordLength), child));
                 }
             }
         }
@@ -298,13 +289,6 @@ std::vector<TimeSeries> iSAXSearcher::search(TimeSeries q, int k) {
     return ret;
 
 }
-
-std::vector<TimeSeries> iSAXSearcher::search(const std::vector<TimeSeries>& queries, int k){
-    for (auto&q: queries){
-        root->search(q, k);
-    }
-}
-*/
 
 void iSAXSearcher::insert(TimeSeries ts) {  
     root->insert(ts);
