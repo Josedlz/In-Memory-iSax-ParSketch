@@ -4,6 +4,18 @@
 #include <cmath>
 #include <iostream>
 
+Node* handle_split(Leaf* node, int turnSplit){
+    auto [leftNode, rightNode] = node->split(turnSplit);
+
+    if (leftNode == nullptr || rightNode == nullptr){
+        return node;
+    }
+
+    auto childPrefix = node->getPrefix();
+    auto nextTurnSplit = (turnSplit + 1) % WORD_LENGTH;
+    auto newInternal = new Internal(childPrefix, leftNode, rightNode, nextTurnSplit);
+    return newInternal;
+}
 
 // ROOT
 explicit Root::Root() {
@@ -11,17 +23,17 @@ explicit Root::Root() {
 
     // We create all the children of the root in advance
     for(int i = 0; i < 1 << WORD_LENGTH; i++) {
-        std::vector<iSAXSymbol> child_prefix;
+        std::vector<iSAXSymbol> childPrefix;
 
         for (int j = 0; j < WORD_LENGTH; j++) {
             if (i & (1 << j)) {
-                child_prefix.emplace_back(1, 1);
+                childPrefix.emplace_back(1, 1);
             } else {
-                child_prefix.emplace_back(0, 1);
+                childPrefix.emplace_back(0, 1);
             }
         }
 
-        children[i] = new Leaf(child_prefix);
+        children[i] = new Leaf(childPrefix, turnSplit=0);
     }
 }
 
@@ -30,7 +42,7 @@ bool Root::covers(std::vector<iSAXSymbol>& timeSeriesWord) const {
     return true;
 }
 
-std::vector<iSAXSymbol> Root::insert(TimeSeries ts) {
+void Root::insert(TimeSeries ts) {
     std::vector<iSAXSymbol> timeSeriesWord;
     auto iSAXRepresentation = ts.tsToiSAX(WORD_LENGTH, CARDINALITY);
 
@@ -39,19 +51,26 @@ std::vector<iSAXSymbol> Root::insert(TimeSeries ts) {
     }
 
     bool inserted = false;
-    std::vector<iSAXSymbol> inserted_node_prefix;
     for (int i=0;i<children.size();i++){
         if (children[i]->covers(timeSeriesWord)){
-            inserted_node_prefix = children[i]->insert(ts);
+            children[i]->insert(ts);
+            if (children[i]->isLeaf() && static_cast<Leaf*>(children[i])->size() > THRESHOLD){
+                auto newInternal = handle_split(static_cast<Leaf*>(children[i]), turnSplit);
+                delete children[i];
+                children[i] = newInternal;
+            }
             inserted = true;
             break;
         }
     }
+
     if (!inserted) {
         throw std::runtime_error("No child from the root covers the time series");
     }
+}
 
-    return inserted_node_prefix;
+std::pair<Node*, Node*> Root::split (int turnSplit) {
+    throw std::runtime_error("Root nodes should not be invoking split");
 }
 
 TimeSeries Root::search(TimeSeries& ts) const {
@@ -62,9 +81,9 @@ TimeSeries Root::search(TimeSeries& ts) const {
         timeSeriesWord.emplace_back(p.first, p.second);
     }
 
-    for (int i=0;i<children.size();i++){
-        if (children[i]->covers(timeSeriesWord)){
-            return children[i]->search(ts);
+    for (auto& child: children){
+        if (child->covers(timeSeriesWord)){
+            return child->search(ts);
         }
     }
 }
@@ -92,9 +111,7 @@ bool Internal::covers(std::vector<iSAXSymbol>& timeSeriesWord) const {
     return true; 
 }
 
-
-std::vector<iSAXSymbol> Internal::insert(TimeSeries ts){
-    //std::vector <iSAXSymbol> timeSeriesWord = ts.tsToSAX();
+void Internal::insert(TimeSeries ts){
     std::vector<iSAXSymbol> timeSeriesWord;
     auto iSAXRepresentation = ts.tsToiSAX(WORD_LENGTH, CARDINALITY);
 
@@ -102,17 +119,28 @@ std::vector<iSAXSymbol> Internal::insert(TimeSeries ts){
         timeSeriesWord.emplace_back(p.first, p.second);
     }
 
-    std::vector<iSAXSymbol> inserted_node_prefix;
+    std::vector<Node*> children = {leftChild, rightChild};
 
-    if (leftChild->covers(timeSeriesWord)){
-        inserted_node_prefix = leftChild->insert(ts);
-    } else if (rightChild->covers(timeSeriesWord)){
-        inserted_node_prefix = rightChild->insert(ts);
-    } else {
+    bool inserted = false;
+    for (auto& child: children){
+        if (child->covers(timeSeriesWord)){
+            child->insert(ts);
+            inserted = true;
+            if (child->isLeaf() && static_cast<Leaf*>(child)->size() > THRESHOLD){
+                auto newInternal = handle_split(static_cast<Leaf*>(child), turnSplit);
+                delete child;
+                child = newInternal;
+            }
+            break;
+        }
+    }
+    if (!inserted) {
         throw std::runtime_error("No child from the internal node covers the time series");
     }
+}
 
-    return inserted_node_prefix;
+std::pair<Node*, Node*> Internal::split (int turnSplit) {
+    throw std::runtime_error("Internal nodes should not be invoking split");
 }
 
 TimeSeries Internal::search(TimeSeries& ts) const {
@@ -123,12 +151,12 @@ TimeSeries Internal::search(TimeSeries& ts) const {
         timeSeriesWord.emplace_back(p.first, p.second);
     }
 
-    if (leftChild->covers(timeSeriesWord)){
-        return leftChild->search(ts);
-    } else if (rightChild->covers(timeSeriesWord)){
-        return rightChild->search(ts);
-    } else {
-        throw std::runtime_error("No child from the internal node covers the time series");
+    std::vector<Node*> children = {leftChild, rightChild};
+
+    for (auto& child: children){
+        if (child->covers(timeSeriesWord)){
+            return child->search(ts);
+        }
     }
 }
 
@@ -137,7 +165,7 @@ Internal::~Internal() {
     delete rightChild;
 }
 
-// Leaf
+// LEAF
 
 bool Leaf::covers(std::vector<iSAXSymbol>& timeSeriesWord) const {
     for (int i=0;i<timeSeriesWord.size();i++){
@@ -155,18 +183,45 @@ bool Leaf::covers(std::vector<iSAXSymbol>& timeSeriesWord) const {
 }
 
 
-std::vector<iSAXSymbol> Leaf::insert(TimeSeries ts) {
+void Leaf::insert(TimeSeries ts) {
     data.push_back(ts);
-    if (data.size() > THRESHOLD){
-        split(turnSplit);
-        turnSplit = (turnSplit + 1) % WORD_LENGTH;
-    } 
 }
 
-std::vector<iSAXSymbol> Leaf::split (int turnSplit) {
+std::pair<Node*, Node*> Leaf::split (int turnSplit) {
     if (pow(2, prefix[turnSplit].level) < CARDINALITY){
-        //TODO
+
+        int nextTurnSplit = (turnSplit + 1) % WORD_LENGTH;
+
+        auto leftPrefix = prefix;
+        leftPrefix[turnSplit].level += 1;
+        leftPrefix[turnSplit].symbol <<= 1;
+
+        auto rightPrefix = prefix;
+        rightPrefix[turnSplit].level += 1;
+        rightPrefix[turnSplit].symbol <<= 1;
+        rightPrefix[turnSplit].symbol += 1;
+
+        auto leftNode = new Leaf(leftPrefix, nextTurnSplit);
+        auto rightNode = new Leaf(rightPrefix, nextTurnSplit);
+
+        for (auto& ts: data){
+            auto iSAXRepresentation = ts.tsToiSAX(WORD_LENGTH, CARDINALITY);
+            std::vector<iSAXSymbol> word;
+
+            for (auto& p: iSAXRepresentation) {
+                word.emplace_back(p.first, p.second);
+            }
+
+            if (leftNode->covers(word)){
+                leftNode->insert(ts);
+            } else {
+                rightNode->insert(ts);
+            }
+        }
+
+        return std::make_pair(leftNode, rightNode);
     }
+    return std::make_pair(nullptr, nullptr);
 }
 
 /*

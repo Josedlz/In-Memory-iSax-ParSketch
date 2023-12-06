@@ -10,7 +10,9 @@
 class Node {
     protected:
     public:
-        virtual std::vector<iSAXSymbol> insert(TimeSeries ts) = 0;
+        virtual void insert(TimeSeries ts) = 0;
+
+        virtual std::pair<Node*, Node*> split (int turnSplit) = 0;
 
         virtual TimeSeries search(TimeSeries& ts) const = 0;
 
@@ -20,18 +22,25 @@ class Node {
 
         virtual bool isLeaf() = 0;
 
+        virtual std::vector<iSAXSymbol> getPrefix() = 0;
+
         virtual ~Node() = default;
+
 };
 
 class Root: public Node {
-    std::vector<Leaf*> children;
+    std::vector<Node*> children;
     std::vector<iSAXSymbol> prefix;
     int turnSplit = 0;
+
     public:
         explicit Root() {
             children.resize(1 << WORD_LENGTH, nullptr);
         }
-        std::vector<iSAXSymbol> insert(TimeSeries ts) override;
+        void insert(TimeSeries ts) override;
+
+        std::pair<Node*, Node*> split (int turnSplit) override;
+
         TimeSeries search(TimeSeries& ts) const override;
 
         bool covers(std::vector<iSAXSymbol>& tsSymbols) const override;
@@ -44,6 +53,10 @@ class Root: public Node {
             return false;
         }
 
+        std::vector<iSAXSymbol> getPrefix() override {
+            return prefix;
+        }
+
         ~Root();
 };
 
@@ -51,14 +64,17 @@ class Internal: public Node {
     Node* leftChild;
     Node* rightChild;
     std::vector<iSAXSymbol> prefix;
-    int turnSplit = 0;
+    int turnSplit;
 
     public:
 
         //explicit Internal(std::vector<iSAXSymbol> prefix) : prefix(prefix), leftChild(nullptr), rightChild(nullptr) {}
-        explicit Internal(std::vector<iSAXSymbol> prefix, Node* left, Node* right) : prefix(prefix), leftChild(left), rightChild(right) {}
+        explicit Internal(std::vector<iSAXSymbol> prefix, Node* left, Node* right, int turnSplit) : prefix(prefix), leftChild(left), rightChild(right), turnSplit(turnSplit) {}
 
-        std::vector<iSAXSymbol> insert(TimeSeries ts) override;
+        void insert(TimeSeries ts) override;
+
+        std::pair<Node*, Node*> split (int turnSplit) override;
+
         TimeSeries search(TimeSeries& ts) const override;
 
         bool covers(std::vector<iSAXSymbol>& tsSymbols) const override;
@@ -69,6 +85,10 @@ class Internal: public Node {
 
         bool isLeaf() override {
             return false;
+        }
+
+        std::vector<iSAXSymbol> getPrefix() override {
+            return prefix;
         }
 
         ~Internal();
@@ -79,18 +99,24 @@ class Leaf: public Node {
     std::vector<iSAXSymbol> prefix;
 
     int M;
-    int turnSplit = 0;
+    int turnSplit;
 
     public:
-        explicit Leaf(std::vector<iSAXSymbol> prefix) : prefix(prefix) {
+        explicit Leaf(std::vector<iSAXSymbol> prefix, int turnSplit) : prefix(prefix), turnSplit(turnSplit) {
             M = THRESHOLD;
         }
 
-        std::vector<iSAXSymbol> insert(TimeSeries ts) override;
-        std::vector<iSAXSymbol> split (int turnSplit);
+        void insert(TimeSeries ts) override;
+
+        std::pair<Node*, Node*> split (int turnSplit);
+
         TimeSeries search(TimeSeries& ts) const override;
 
         bool covers(std::vector<iSAXSymbol>& tsSymbols) const override;
+
+        size_t size() const {
+            return data.size();
+        }
 
         bool isRoot() override {
             return false;
@@ -98,6 +124,10 @@ class Leaf: public Node {
 
         bool isLeaf() override {
             return true;
+        }
+
+        std::vector<iSAXSymbol> getPrefix() override {
+            return prefix;
         }
 
         ~Leaf() = default;
