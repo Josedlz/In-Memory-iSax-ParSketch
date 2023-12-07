@@ -112,7 +112,7 @@ public:
         }
         cout << "Filtered candidates size: " << filteredCandidates.size() << endl;
 
-        // Ordena los candidatos por distancia
+        // Ordenamos los candidatos por distancia
         std::sort(filteredCandidates.begin(), filteredCandidates.end(),
                   [](const auto &a, const auto &b)
                   { return std::get<2>(a) < std::get<2>(b); });
@@ -191,7 +191,7 @@ public:
     }
     vector<vector<int>> tsToSketch(vector<float> &ts, vector<vector<float>> &RandMxBroad)
     {
-        auto normalizedTs = normalize(ts); // Debes implementar la función normalize
+        auto normalizedTs = normalize(ts);
 
         auto multiplied = mult(normalizedTs, RandMxBroad);
 
@@ -214,7 +214,7 @@ public:
     }
     vector<vector<int>> tsProgrSketch(vector<float> &ts, vector<vector<float>> &RandMxBroad, vector<vector<float>> &breakpoints)
     {
-        auto normalizedTs = normalize(ts); // Debes implementar la función normalize
+        auto normalizedTs = normalize(ts);
         auto multiplied = mult(normalizedTs, RandMxBroad);
 
         vector<pair<double, size_t>> zipped;
@@ -242,7 +242,7 @@ public:
         {
             if (value == -1)
             {
-                // If v == -1, use the length of the first breakpoint vector - 1
+                // Si v == -1 usamos la longitud del primer vector de breakpoints
                 result1.push_back(breakpoints[0].size() - 1);
             }
             else

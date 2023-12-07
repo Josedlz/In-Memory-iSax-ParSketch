@@ -20,8 +20,12 @@ int main()
     if (!file.is_open()) {
         std::cerr << "Error opening file: " << datapath << std::endl;
     }
+    int idx = 25;
+    while(idx) {
+        std::getline(file, line);
+        idx--;
+    }
 
-    std::getline(file, line);
     std::istringstream iss(line);
     std::vector<float> test_time_series;
     float num;
@@ -31,7 +35,6 @@ int main()
     }
 
     file.close();
-    
     std::cout << "Searching for the 5 nearest neighbors of the first time series in the dataset" << std::endl;
     auto result = searcher.search(test_time_series, 5);
     std::cout << "Search completed" << std::endl;
@@ -42,6 +45,5 @@ int main()
         }
         std::cout << std::endl;
     }
-
     return 0;
 }

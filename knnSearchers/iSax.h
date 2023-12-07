@@ -6,11 +6,10 @@
 #include "knnSearcher.h"
 #include "../TimeSeries/TimeSeries.h"
 
-
 class Node {
     private:
         int THRESHOLD = 5;
-        int WORD_LENGTH = 4;
+        int WORD_LENGTH = 20;
         int CARDINALITY = 4;
     public:
         std::vector<Node*> children;
@@ -47,6 +46,8 @@ class Node {
         bool isLeaf(){
             return false;
         }
+        
+        void print(size_t indent = 0);
 
         virtual void insert(TimeSeries ts) = 0;
         
@@ -96,6 +97,8 @@ class iSAXSearcher: public knnSearcher {
         std::vector<TimeSeries> search(const std::vector<TimeSeries>& queries, int k) override;
         void insert(TimeSeries ts) override;
         void createIndex() override;
+
+        void print() const;
 };
 
 template <typename T>

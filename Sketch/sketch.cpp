@@ -45,16 +45,16 @@ int main(int argc, char *argv[])
 
     vector<vector<float>> breakpoints = searcher.createBreakpoints(sampleProject, gridDimension);
 
-    // Ahora, calcula los sketches y asigna a las celdas de la cuadrícula
+    // Ahora, calculamos los sketches y asignamos a las celdas de la cuadrícula
     vector<vector<vector<int>>> sketches; // Almacena los sketches
 
-    // Itera sobre todas las series temporales en el conjunto de datos
+    // Iteramos sobre todas las series temporales en el conjunto de datos
     for (auto &ts : data)
     {
         // Asigna el sketch a las celdas de la cuadrícula usando breakpoints
         auto progrSketch = searcher.tsProgrSketch(ts, R, breakpoints);
 
-        // Agrega el sketch asignado a la lista de sketches
+        // Agregamos el sketch asignado a la lista de sketches
         sketches.push_back(progrSketch);
     }
 
