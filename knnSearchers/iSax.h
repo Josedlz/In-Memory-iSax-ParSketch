@@ -14,7 +14,7 @@ class Node {
 
         virtual std::pair<Node*, Node*> split (int turnSplit) = 0;
 
-        virtual TimeSeries search(TimeSeries& ts) const = 0;
+        virtual TimeSeries search(const TimeSeries& ts) const = 0;
 
         virtual bool covers(std::vector<iSAXSymbol>& tsSymbols) const = 0; 
 
@@ -39,7 +39,7 @@ class Root: public Node {
 
         std::pair<Node*, Node*> split (int turnSplit) override;
 
-        TimeSeries search(TimeSeries& ts) const override;
+        TimeSeries search(const TimeSeries& ts) const override;
 
         bool covers(std::vector<iSAXSymbol>& tsSymbols) const override;
 
@@ -73,7 +73,7 @@ class Internal: public Node {
 
         std::pair<Node*, Node*> split (int turnSplit) override;
 
-        TimeSeries search(TimeSeries& ts) const override;
+        TimeSeries search(const TimeSeries& ts) const override;
 
         bool covers(std::vector<iSAXSymbol>& tsSymbols) const override;
 
@@ -108,7 +108,7 @@ class Leaf: public Node {
 
         std::pair<Node*, Node*> split (int turnSplit);
 
-        TimeSeries search(TimeSeries& ts) const override;
+        TimeSeries search(const TimeSeries& ts) const override;
 
         bool covers(std::vector<iSAXSymbol>& tsSymbols) const override;
 
@@ -152,8 +152,12 @@ class iSAXSearcher: public knnSearcher {
             delete root;
         };
 
-        std::vector<TimeSeries> search(TimeSeries q, int k) override;
-        void insert(TimeSeries ts) override;
+        TimeSeries search(const TimeSeries& q);
+
+        std::vector<TimeSeries> search(const TimeSeries& q, int k) override;
+
+        void insert(const TimeSeries& ts) override;
+
         void createIndex() override;
 
 };

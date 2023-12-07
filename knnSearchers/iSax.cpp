@@ -73,7 +73,7 @@ std::pair<Node*, Node*> Root::split (int turnSplit) {
     throw std::runtime_error("Root nodes should not be invoking split");
 }
 
-TimeSeries Root::search(TimeSeries& ts) const {
+TimeSeries Root::search(const TimeSeries& ts) const {
     std::vector<iSAXSymbol> timeSeriesWord;
     auto iSAXRepresentation = ts.tsToiSAX(WORD_LENGTH, CARDINALITY);
 
@@ -145,7 +145,7 @@ std::pair<Node*, Node*> Internal::split (int turnSplit) {
     throw std::runtime_error("Internal nodes should not be invoking split");
 }
 
-TimeSeries Internal::search(TimeSeries& ts) const {
+TimeSeries Internal::search(const TimeSeries& ts) const {
     std::vector<iSAXSymbol> timeSeriesWord;
     auto iSAXRepresentation = ts.tsToiSAX(WORD_LENGTH, CARDINALITY);
 
@@ -160,6 +160,7 @@ TimeSeries Internal::search(TimeSeries& ts) const {
             return child->search(ts);
         }
     }
+    return TimeSeries();
 }
 
 Internal::~Internal() {
@@ -226,7 +227,7 @@ std::pair<Node*, Node*> Leaf::split (int turnSplit) {
     return std::make_pair(nullptr, nullptr);
 }
 
-TimeSeries Leaf::search(TimeSeries& ts) const {
+TimeSeries Leaf::search(const TimeSeries& ts) const {
     TimeSeries bestMatch;
     double bestDist = std::numeric_limits<double>::max();
 
@@ -241,7 +242,11 @@ TimeSeries Leaf::search(TimeSeries& ts) const {
     return bestMatch;
 }
 
-std::vector<TimeSeries> iSAXSearcher::search(TimeSeries q, int k) {
+TimeSeries iSAXSearcher::search(const TimeSeries& q) {
+    return root->search(q);
+}
+
+std::vector<TimeSeries> iSAXSearcher::search(const TimeSeries& q, int k) {
     // best first search
     indexablePQ<TimeSeries> result(k);
 
@@ -292,7 +297,7 @@ std::vector<TimeSeries> iSAXSearcher::search(TimeSeries q, int k) {
 
 }
 
-void iSAXSearcher::insert(TimeSeries ts) {  
+void iSAXSearcher::insert(const TimeSeries& ts) {  
     root->insert(ts);
 }
 

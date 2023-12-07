@@ -20,7 +20,7 @@ int main()
     if (!file.is_open()) {
         std::cerr << "Error opening file: " << datapath << std::endl;
     }
-    int idx = 25;
+    int idx = 2;
     while(idx) {
         std::getline(file, line);
         idx--;
@@ -35,15 +35,21 @@ int main()
     }
 
     file.close();
+
     std::cout << "Searching for the 5 nearest neighbors of the first time series in the dataset" << std::endl;
-    auto result = searcher.search(test_time_series, 5);
+
+    for(auto& val: test_time_series){
+        std::cout << val << " ";
+    }
+    std::cout << std::endl;
+
+    //auto result = searcher.search(test_time_series, 5);
+    auto ts = searcher.search(test_time_series);    
+
     std::cout << "Search completed" << std::endl;
 
-    for (auto& ts: result){
-        for(auto& val: ts){
-            std::cout << val << " ";
-        }
-        std::cout << std::endl;
+    for(auto& val: ts){
+        std::cout << val << " ";
     }
     return 0;
 }

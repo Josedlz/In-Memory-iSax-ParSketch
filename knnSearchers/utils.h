@@ -34,7 +34,7 @@ class indexablePQ {
   
             // If the vector is not full yet, append a placeholder at the end
             if (sortedList.size() < k) {
-                sortedList.emplace_back();
+                sortedList.emplace_back(std::numeric_limits<double>::infinity(), T());
             }
   
             // Determine the starting point for shifting elements to the right

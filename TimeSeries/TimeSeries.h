@@ -50,15 +50,10 @@ class iSAXSymbol {
 
 class TimeSeries {
     private:
-        int length;
         std::vector<float> values;
-        std::vector<float> breakpoints;
-        std::vector<float> curPointsValues;
-        std::vector<float> paaRepresentation;
-        std::vector<std::pair<int, int>> iSAXRepresentation;
 
-        void getPAARepresentation(int wordLength);
-        void getiSAXRepresentation(int wordLength, int cardinality);
+        std::vector<float> getPAARepresentation(int wordLength) const;
+        std::vector<std::pair<int, int>> getiSAXRepresentation(const std::vector<float>& paaRepresentation, int wordLength, int cardinality) const;
 
     public:
         TimeSeries() = default;
@@ -75,11 +70,11 @@ class TimeSeries {
         std::vector <float>::iterator begin();
         std::vector <float>::iterator end();
 
-        std::vector<std::pair<int, int>> tsToiSAX(int wordLength, int cardinality);
+        std::vector<std::pair<int, int>> tsToiSAX(int wordLength, int cardinality) const;
 
-        int minDist(std::vector<iSAXSymbol> o, int maxWith, int wordLength);
+        int minDist(const std::vector<iSAXSymbol>& o, int maxWith, int wordLength) const;
 
-        double euclideanDist(TimeSeries o);
+        double euclideanDist(const TimeSeries& o) const;
 };
 
 

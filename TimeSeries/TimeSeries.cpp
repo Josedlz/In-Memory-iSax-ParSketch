@@ -6,16 +6,14 @@
 
 TimeSeries::TimeSeries(std::vector<float> values) {
     this->values = values;
-    this->length = values.size();
 }
 
 void TimeSeries::setValues(const std::vector<float>& values) {
     this->values = values;
-    this->length = values.size();
 }
 
 int TimeSeries::getLength() {
-    return this->length;
+    return this->values.size();
 }
 
 std::vector<float> TimeSeries::getValues() {
@@ -30,13 +28,13 @@ std::vector <float>::iterator TimeSeries::end() {
     return this->values.end();
 }
 
-void TimeSeries::getPAARepresentation(int wordLength) {
-    this->paaRepresentation.resize(wordLength, 0.0f);
-
-    this->breakpoints.resize(wordLength);
+std::vector<float> TimeSeries::getPAARepresentation(int wordLength) const {
+    std::vector<float> breakpoints, paaRepresentation;
+    paaRepresentation.resize(wordLength, 0.0f);
+    breakpoints.resize(wordLength);
 
     for (int i = 0; i < wordLength; i++) {
-        this->breakpoints[i] = 0 + int(this->values.size() / wordLength) * (i + 1);
+        breakpoints[i] = 0 + int(this->values.size() / wordLength) * (i + 1);
     }
 
     /*
@@ -53,11 +51,11 @@ void TimeSeries::getPAARepresentation(int wordLength) {
     for (int segment = 0; segment < wordLength; segment++) {
 
         while (currentIndexCurrentBucket < breakpoints[segment]) {
-            this->paaRepresentation[segment] += this->values[currentIndexCurrentBucket];
+            paaRepresentation[segment] += this->values[currentIndexCurrentBucket];
             currentIndexCurrentBucket++;
         }
 
-        this->paaRepresentation[segment] /= currentIndexCurrentBucket - lastIndexPreviousBucket + 1;
+        paaRepresentation[segment] /= currentIndexCurrentBucket - lastIndexPreviousBucket + 1;
         lastIndexPreviousBucket = currentIndexCurrentBucket;
     }
 
@@ -68,9 +66,11 @@ void TimeSeries::getPAARepresentation(int wordLength) {
     }
     std::cout << std::endl;
     */
+
+   return paaRepresentation;
 }
 
-void TimeSeries::getiSAXRepresentation(int wordLength, int cardinality) {
+std::vector<std::pair<int, int>> TimeSeries::getiSAXRepresentation(const std::vector<float>& paaRepresentation, int wordLength, int cardinality) const {
 
     float min = *std::min_element(this->values.begin(), this->values.end());
     float max = *std::max_element(this->values.begin(), this->values.end());
@@ -79,14 +79,15 @@ void TimeSeries::getiSAXRepresentation(int wordLength, int cardinality) {
 
     float step = range / (cardinality);
 
-    this->iSAXRepresentation.resize(wordLength, std::make_pair(0, cardinality));
+    std::vector<std::pair<int, int>> iSAXRepresentation;
+    iSAXRepresentation.resize(wordLength, std::make_pair(0, cardinality));
 
     for (int i = 0; i < wordLength; i++) {
-        auto PAA = this->paaRepresentation[i];
+        auto PAA = paaRepresentation[i];
 
         for (int j = 0; j < cardinality; j++) {
             if (PAA >= min + j * step && PAA <= min + (j + 1) * step) {
-                this->iSAXRepresentation[i] = std::make_pair(j, log2(cardinality));
+                iSAXRepresentation[i] = std::make_pair(j, log2(cardinality));
                 break;
             }
         }
@@ -99,17 +100,17 @@ void TimeSeries::getiSAXRepresentation(int wordLength, int cardinality) {
     }
     std::cout << std::endl;
     */
+
+   return iSAXRepresentation;
 }
 
-std::vector<std::pair<int, int>> TimeSeries::tsToiSAX(int wordLength, int cardinality) {
+std::vector<std::pair<int, int>> TimeSeries::tsToiSAX(int wordLength, int cardinality) const {
 
-    getPAARepresentation(wordLength);
-    getiSAXRepresentation(wordLength, cardinality);
-
-    return this->iSAXRepresentation;
+    auto paaRepresentation = getPAARepresentation(wordLength);
+    return getiSAXRepresentation(paaRepresentation, wordLength, cardinality);
 }
 
-int TimeSeries::minDist(std::vector<iSAXSymbol> o, int cardinality, int wordLength) {
+int TimeSeries::minDist(const std::vector<iSAXSymbol>& o, int cardinality, int wordLength) const {
     auto thisiSAX = this->tsToiSAX(cardinality, wordLength);
 
     int dist = 0;
@@ -122,10 +123,10 @@ int TimeSeries::minDist(std::vector<iSAXSymbol> o, int cardinality, int wordLeng
     return dist;
 }
 
-double TimeSeries::euclideanDist(TimeSeries o) {
+double TimeSeries::euclideanDist(const TimeSeries& o) const {
     double dist = 0;
 
-    for (int i = 0; i < this->length; i++) {
+    for (int i = 0; i < this->values.size(); i++) {
         double temp = this->values[i] - o.values[i];
         dist += temp * temp;
     }

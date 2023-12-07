@@ -18,9 +18,9 @@ class knnSearcher {
     public:
         knnSearcher(std::string filename);
 
-        virtual std::vector<TimeSeries> search(TimeSeries q, int k) = 0;
+        virtual std::vector<TimeSeries> search(const TimeSeries& q, int k) = 0;
 
-        virtual void insert(TimeSeries t) = 0;
+        virtual void insert(const TimeSeries& t) = 0;
 
         virtual void createIndex() = 0;
 
