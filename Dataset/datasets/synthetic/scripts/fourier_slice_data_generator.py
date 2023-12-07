@@ -2,7 +2,7 @@ import numpy as np
 import scipy.fftpack
 
 # Parameters
-num_series = 30  # Total number of time series
+num_series = 200  # Total number of time series
 time_points = 20  # Length of each time series
 x = 10  # Number of high amplitude frequency components
 y = 0  # Starting frequency component for high amplitude

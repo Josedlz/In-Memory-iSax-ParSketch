@@ -29,11 +29,11 @@ class Node {
 };
 
 class Root: public Node {
-    std::vector<Node*> children;
     std::vector<iSAXSymbol> prefix;
     int turnSplit = 0;
 
     public:
+        std::vector<Node*> children;
         explicit Root(); 
         void insert(TimeSeries ts) override;
 
@@ -138,7 +138,6 @@ class Leaf: public Node {
 class iSAXSearcher: public knnSearcher {
     private:
         Root* root;
-        int maxCard;
         int wordLength;
         int threshold;
         int cardinality;
@@ -146,6 +145,9 @@ class iSAXSearcher: public knnSearcher {
 
         iSAXSearcher(std::string filename) : knnSearcher(filename) {
             this->root = new Root();
+            this->cardinality = CARDINALITY;
+            this->wordLength = WORD_LENGTH;
+            this->threshold = THRESHOLD;
         }
 
         ~iSAXSearcher() {

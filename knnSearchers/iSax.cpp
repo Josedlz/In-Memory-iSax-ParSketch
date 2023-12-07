@@ -295,8 +295,14 @@ std::vector<TimeSeries> iSAXSearcher::search(const TimeSeries& q, int k) {
                     result.push(std::make_pair(q.euclideanDist(ts), ts));
                 }
             }
-
-        } else {
+        } else if (candidate.second->isRoot()) {
+            for (auto& child: static_cast<Root*>(candidate.second)->children){
+                if (child->covers(word)){
+                    candidates.push(std::make_pair(q.minDist(child->getPrefix(), cardinality, wordLength), child));
+                }
+            }
+        } 
+        else {
             std::vector<Node*> children = {static_cast<Internal*>(candidate.second)->leftChild, static_cast<Internal*>(candidate.second)->rightChild};
             for (auto& child: children){
                 if (child->covers(word) or candidate.second->isRoot()){
@@ -327,6 +333,6 @@ void iSAXSearcher::createIndex() {
         root->insert(ts);
         std::cout << "Inserted " << i++ << std::endl;
 
-        if(i == 50) break;
+        //if(i == 50) break;
     }
 }

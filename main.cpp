@@ -20,7 +20,7 @@ int main()
     if (!file.is_open()) {
         std::cerr << "Error opening file: " << datapath << std::endl;
     }
-    int idx = 2;
+    int idx = 110;
     while(idx) {
         std::getline(file, line);
         idx--;
@@ -43,7 +43,8 @@ int main()
     }
     std::cout << std::endl;
 
-    //auto result = searcher.search(test_time_series, 5);
+    auto result = searcher.search(test_time_series, 5);
+    /*
     auto ts = searcher.search(test_time_series);    
 
     std::cout << "Search completed" << std::endl;
@@ -51,5 +52,6 @@ int main()
     for(auto& val: ts){
         std::cout << val << " ";
     }
+    */
     return 0;
 }
