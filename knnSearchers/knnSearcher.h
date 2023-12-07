@@ -20,8 +20,6 @@ class knnSearcher {
 
         virtual std::vector<TimeSeries> search(TimeSeries q, int k) = 0;
 
-        virtual std::vector<TimeSeries> search(const std::vector<TimeSeries>& queries, int k) = 0;
-
         virtual void insert(TimeSeries t) = 0;
 
         virtual void createIndex() = 0;

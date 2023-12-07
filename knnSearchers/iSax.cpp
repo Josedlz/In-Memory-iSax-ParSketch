@@ -18,7 +18,7 @@ Node* handle_split(Leaf* node, int turnSplit){
 }
 
 // ROOT
-explicit Root::Root() {
+Root::Root() {
     children.resize(1 << WORD_LENGTH, nullptr);
 
     // We create all the children of the root in advance
@@ -86,6 +86,8 @@ TimeSeries Root::search(TimeSeries& ts) const {
             return child->search(ts);
         }
     }
+
+    return TimeSeries();
 }
 
 Root::~Root() {

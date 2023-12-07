@@ -2,6 +2,8 @@
 #define UTILS_H
 
 #include <string>
+#include <vector>
+#include <limits>
 
 std::string toBinary(int symbol, int level);
 

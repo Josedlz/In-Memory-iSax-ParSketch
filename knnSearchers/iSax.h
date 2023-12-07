@@ -34,9 +34,7 @@ class Root: public Node {
     int turnSplit = 0;
 
     public:
-        explicit Root() {
-            children.resize(1 << WORD_LENGTH, nullptr);
-        }
+        explicit Root(); 
         void insert(TimeSeries ts) override;
 
         std::pair<Node*, Node*> split (int turnSplit) override;
@@ -155,7 +153,6 @@ class iSAXSearcher: public knnSearcher {
         };
 
         std::vector<TimeSeries> search(TimeSeries q, int k) override;
-        std::vector<TimeSeries> search(const std::vector<TimeSeries>& queries, int k) override;
         void insert(TimeSeries ts) override;
         void createIndex() override;
 
