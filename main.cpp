@@ -44,6 +44,14 @@ int main()
     std::cout << std::endl;
 
     auto result = searcher.search(test_time_series, 5);
+
+    std::cout << "Results:\n";
+    for (auto& ts : result) {
+        for (auto& val : ts) {
+            std::cout << val << " ";
+        }
+        std::cout << std::endl;
+    }
     /*
     auto ts = searcher.search(test_time_series);    
 

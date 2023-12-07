@@ -16,37 +16,13 @@ class iSAXSymbol {
             this->level = level;
         }
 
-        double minDist(iSAXSymbol o) {
-            iSAXSymbol a, b;
-            if (level < o.level) {
-                a = *this;
-                b = o;
-            } else {
-                b = *this;
-                a = o;
-            }
+        double minDistToSymbol(iSAXSymbol o);
 
-            if (a.level == b.level) {
-                std::vector<std::vector<double>> distMat; //= getDistanceMatrix(1 << a.level);
-                return distMat[a.symbol][b.symbol];
-            } else {
-                std::vector<std::vector<double>> distMat; //= getDistanceMatrix(1 << b.level);
-                int widthDiff = b.level - a.level;
-                int rsBLoad = b.symbol >> widthDiff;
-                if (a.symbol > rsBLoad) {
-                    int lsALoad = (a.symbol << widthDiff) & (INT_MAX << widthDiff);
-                    return distMat[b.symbol][lsALoad];
-                } else if (a.symbol < rsBLoad) {
-                    int lsALoad = (a.symbol << widthDiff) | (INT_MAX >> (sizeof(int) * 8 - widthDiff));
-                    return distMat[b.symbol][lsALoad];
-                } else {
-                    return 0;
-                }
-            }
-        }
         ~iSAXSymbol() = default;
 };
 
+
+std::vector<std::vector<double>> getSAXdistanceMatrix(int cardinality);
 
 class TimeSeries {
     private:

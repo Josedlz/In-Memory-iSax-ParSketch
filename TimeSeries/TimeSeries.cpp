@@ -2,7 +2,59 @@
 #include <iostream>
 #include <cmath>
 
+std::vector<std::vector<double>> getSAXdistanceMatrix(int cardinality) {
+    std::vector<std::vector<double>> distanceMatrix(cardinality, std::vector<double>(cardinality, 0));
 
+    // Assuming linear breakpoints for simplicity
+    for (int i = 0; i < cardinality; ++i) {
+        for (int j = 0; j < cardinality; ++j) {
+            distanceMatrix[i][j] = std::abs(i - j); // Distance is the difference in breakpoints
+        }
+    }
+
+    return distanceMatrix;
+}
+
+double iSAXSymbol::minDistToSymbol(iSAXSymbol o) {
+    iSAXSymbol a, b;
+    if (level < o.level) {
+        a = *this;
+        b = o;
+    } else {
+        b = *this;
+        a = o;
+    }
+    if (a.symbol < 0 || a.symbol >= (1 << a.level) || b.symbol < 0 || b.symbol >= (1 << b.level)) {
+        // Handle error: symbol out of bounds
+        throw std::out_of_range("Symbol out of bounds");
+    }
+    std::vector<std::vector<double>> distMat = getSAXdistanceMatrix(1 << b.level);
+
+    if (a.level == b.level) {
+        return distMat[a.symbol][b.symbol];
+    } else {
+        // Different cardinalities, need to "promote" the lower cardinality symbol
+        int widthDiff = b.level - a.level;
+        int rsBLoad = b.symbol >> widthDiff;
+
+        int promotedASymbol = a.symbol << widthDiff;
+        for (int i = 0; i < (1 << widthDiff); ++i) {
+            int bitMask = 1 << (widthDiff - 1 - i);
+            if ((a.symbol & bitMask) == (rsBLoad & bitMask)) {
+                // S^k_i forms a prefix for T^8_i
+                promotedASymbol |= (b.symbol & bitMask);
+            } else if ((a.symbol & bitMask) < (rsBLoad & bitMask)) {
+                // S^k_i is lexicographically smaller than T^8_i
+                promotedASymbol |= bitMask;
+            } else {
+                // Else, leave the bit as 0 (already set by the left shift)
+            }
+        }
+
+        // Calculate the distance using the promoted symbol
+        return distMat[b.symbol][promotedASymbol];
+    }
+}
 
 TimeSeries::TimeSeries(std::vector<float> values) {
     this->values = values;
@@ -113,14 +165,17 @@ std::vector<std::pair<int, int>> TimeSeries::tsToiSAX(int wordLength, int cardin
 int TimeSeries::minDist(const std::vector<iSAXSymbol>& o, int cardinality, int wordLength) const {
     auto thisiSAX = this->tsToiSAX(cardinality, wordLength);
 
-    int dist = 0;
+    double totalDist = 0.0;
 
     for (int i = 0; i < wordLength; i++) {
-        double temp = iSAXSymbol(thisiSAX[i].first, thisiSAX[i].second).minDist(o[i]);
-        dist += temp * temp;
+        iSAXSymbol thisSymbol(thisiSAX[i].first, thisiSAX[i].second);
+
+        // Calculate the distance between each pair of symbols
+        double temp = thisSymbol.minDistToSymbol(o[i]);
+        totalDist += temp * temp; // Squaring the distance as per the original implementation
     }
 
-    return dist;
+    return static_cast<int>(totalDist);
 }
 
 double TimeSeries::euclideanDist(const TimeSeries& o) const {
