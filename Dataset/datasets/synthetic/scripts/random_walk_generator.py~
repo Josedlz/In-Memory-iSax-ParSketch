@@ -1,24 +1,21 @@
 import numpy as np
 
 # Parameters
-num_series = 2000  # Total number of time series, adjust as needed
+num_series = 2000  # Total number of time series
 time_points = 256
 mean = 0
 std_dev = 1
-chunk_size = num_series // 100  # Number of series to process at a time, adjust based on available memory
+chunk_size = num_series // 100  # Number of series to process at a time
 
 path_to_save = '../random_walk/random_walk_dataset.txt'
 
-# Open a file to save the dataset
-with open('random_walk_dataset.txt', 'w') as file:
+with open(path_to_save, 'w') as file:
     for _ in range(num_series // chunk_size):
-        # Generate a chunk of random steps
         steps_chunk = np.random.normal(mean, std_dev, (chunk_size, time_points))
 
         # Cumulative sum to create the random walk for each series in the chunk
         dataset_chunk = np.cumsum(steps_chunk, axis=1)
 
-        # Write the chunk to the file
         for series in dataset_chunk:
             series_str = ' '.join(map(str, series))
             file.write(series_str + '\n')

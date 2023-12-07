@@ -1,7 +1,7 @@
 import numpy as np
 
 # Parameters
-num_series = 2000  # Total number of time series
+num_series = 200 # Total number of time series
 time_points = 256
 mean = 0
 std_dev = 1

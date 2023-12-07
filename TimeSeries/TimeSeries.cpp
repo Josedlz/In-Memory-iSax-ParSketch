@@ -64,11 +64,11 @@ void TimeSeries::setValues(const std::vector<float>& values) {
     this->values = values;
 }
 
-int TimeSeries::getLength() {
+int TimeSeries::getLength() const{
     return this->values.size();
 }
 
-std::vector<float> TimeSeries::getValues() {
+std::vector<float> TimeSeries::getValues() const{
     return this->values;
 }
 

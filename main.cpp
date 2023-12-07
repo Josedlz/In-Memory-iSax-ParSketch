@@ -4,6 +4,28 @@
 
 using namespace std;
 
+void search_one(iSAXSearcher& searcher, std::vector<float>& test_time_series) {
+    auto ts = searcher.search(test_time_series);
+
+    std::cout << "Results:\n";
+    for (auto& val : ts) {
+        std::cout << val << " ";
+    }
+    std::cout << std::endl;
+}
+
+void searchKNN(iSAXSearcher& searcher, std::vector<float>& test_time_series, int k) {
+    auto ts = searcher.search(test_time_series, k);
+
+    std::cout << "Results:\n";
+    for (auto& val : ts) {
+        for (auto& val2 : val) {
+            std::cout << val2 << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
 int main()
 {
     std::string datapath = "Dataset/datasets/synthetic/fourier_slice/fourier_slice_dataset.txt";
@@ -43,23 +65,6 @@ int main()
     }
     std::cout << std::endl;
 
-    auto result = searcher.search(test_time_series, 5);
-
-    std::cout << "Results:\n";
-    for (auto& ts : result) {
-        for (auto& val : ts) {
-            std::cout << val << " ";
-        }
-        std::cout << std::endl;
-    }
-    /*
-    auto ts = searcher.search(test_time_series);    
-
-    std::cout << "Search completed" << std::endl;
-
-    for(auto& val: ts){
-        std::cout << val << " ";
-    }
-    */
+    search_one(searcher, test_time_series);
     return 0;
 }

@@ -39,9 +39,9 @@ class TimeSeries {
 
         void setValues(const std::vector<float>& values);
 
-        int getLength();
+        int getLength() const;
 
-        std::vector<float> getValues();
+        std::vector<float> getValues() const;
 
         std::vector <float>::iterator begin();
         std::vector <float>::iterator end();

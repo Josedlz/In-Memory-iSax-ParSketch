@@ -1,19 +1,32 @@
 #ifndef DPISAX_H
 #define DPISAX_H
 
-#include "knnSearcher.h"
+#include "iSax.h"
+#include "utils.h"
+#include <string>
+#include <cstring>
+#include <vector>
+
+std::vector<char> serializeTimeSeries(const std::vector<float> values);
+
+void broadcastSerializedQuery(const std::vector<char>& serializedQuery, int rank, int size);
+
+std::vector<float> deserializeTimeSeries(std::vector<char> serializedQuery);
+
+std::vector<TimeSeries> gatherResults(std::vector<TimeSeries> localResults, int rank, int size);
+
+std::vector<TimeSeries> combineResults(const TimeSeries& q, std::vector<TimeSeries> globalResults, int k);
+
 
 class DPiSAX {
 private:
-    // Attributes for DPiSAX, such as partitioning information, SAX parameters, etc.
-
+    std::vector<std::string> filePaths;
+    int k;
 public:
-    DPiSAX(std::string filename);
+    DPiSAX(std::vector<std::string> filenames, int k);
     ~DPiSAX();
 
-    void DPiSAX::parallelIndexBuild();
-
-    void DPiSAX::parallelSearch(TimeSeries q, int k); 
+    std::vector<TimeSeries> parallelSearch(TimeSeries q, int k); 
 
 };
 
