@@ -54,6 +54,7 @@ public:
     {
         // Genera el "sketch progresivo" de la consulta
         vector<vector<int>> progrSketch = tsProgrSketch(queryTS, RandMxBroad, breakpoints);
+        /*
         cout << "Query sketch: " << endl;
         for (auto &i : progrSketch)
         {
@@ -62,7 +63,7 @@ public:
                 cout << j << " ";
             }
             cout << endl;
-        }
+        }*/
 
         // Almacena los candidatos potenciales
         vector<tuple<long, vector<float>, float>> candidates;
@@ -117,6 +118,8 @@ public:
                   { return std::get<2>(a) < std::get<2>(b); });
 
         // Limita la cantidad de resultados a los primeros k
+        cout << "K: " << k << endl;
+        cout << "Filtered candidates size: " << filteredCandidates.size() << endl;
         if (filteredCandidates.size() > k)
         {
             filteredCandidates.resize(k);
@@ -289,7 +292,7 @@ public:
     std::vector<vector<float>> randomSample(vector<vector<float>> &data, int L)
     {
         std::random_device rd;
-        std::mt19937 gen(rd());
+        std::mt19937 gen(42);
         std::vector<vector<float>> sampledData;
         std::sample(data.begin(), data.end(), std::back_inserter(sampledData), L, gen);
 
@@ -315,7 +318,7 @@ public:
     {
         vector<vector<float>> result;
         random_device rd;
-        mt19937 gen(rd());
+        mt19937 gen(42);
         uniform_real_distribution<float> dis(-1.0, 1.0);
 
         for (int j = 0; j < a; ++j)
@@ -357,12 +360,14 @@ public:
 
         //  Calcula la proporción de celdas similares
         double similarityRatio = static_cast<double>(similarCount) / sketch1.size();
+        /*
         if (similarCount > 0 && similarityRatio > 0)
         {
             cout << "Similar count: " << similarCount << endl;
             cout << "Similarity ratio: " << similarityRatio << endl;
             cout << "Threshold: " << threshold << endl;
         }
+        */
         // Compara la proporción con el umbral
         return similarityRatio >= threshold;
     }
