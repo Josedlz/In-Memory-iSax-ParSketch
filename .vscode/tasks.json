@@ -11,6 +11,8 @@
                 "${workspaceFolder}/main.cpp", 
                 "${workspaceFolder}/knnSearchers/knnSearcher.cpp",
                 "${workspaceFolder}/knnSearchers/iSax.cpp",
+                "${workspaceFolder}/knnSearchers/utils.cpp",
+                "${workspaceFolder}/knnSearchers/config.cpp",
                 "${workspaceFolder}/TimeSeries/TimeSeries.cpp",
                 "${workspaceFolder}/Dataset/Dataset.cpp",
                 "-o",

@@ -8,6 +8,13 @@ Node* handle_split(Leaf* node, int turnSplit){
     auto [leftNode, rightNode] = node->split(turnSplit);
 
     if (leftNode == nullptr || rightNode == nullptr){
+        std::cout << "This node does not need to be split" << std::endl;
+        std::cout << "Its prefix is: " << std::endl;
+
+        for (auto& p: node->getPrefix()){
+            std::cout << p.symbol << "-" << p.level << " ";
+        }
+        std::cout << std::endl;
         return node;
     }
 
@@ -56,8 +63,10 @@ void Root::insert(TimeSeries ts) {
             children[i]->insert(ts);
             if (children[i]->isLeaf() && static_cast<Leaf*>(children[i])->size() > THRESHOLD){
                 auto newInternal = handle_split(static_cast<Leaf*>(children[i]), turnSplit);
-                delete children[i];
-                children[i] = newInternal;
+                if (newInternal != children[i]){
+                    delete children[i];
+                    children[i] = newInternal;
+                }
             }
             inserted = true;
             break;
@@ -130,12 +139,19 @@ void Internal::insert(TimeSeries ts){
             inserted = true;
             if (child->isLeaf() && static_cast<Leaf*>(child)->size() > THRESHOLD){
                 auto newInternal = handle_split(static_cast<Leaf*>(child), turnSplit);
-                delete child;
-                child = newInternal;
+                if (newInternal != child){
+                    std::cout << "Replacing child" << std::endl;
+                    delete child;
+                    child = newInternal;
+                }
             }
             break;
         }
     }
+
+    leftChild = children[0];
+    rightChild = children[1];
+
     if (!inserted) {
         throw std::runtime_error("No child from the internal node covers the time series");
     }
@@ -221,7 +237,10 @@ std::pair<Node*, Node*> Leaf::split (int turnSplit) {
                 rightNode->insert(ts);
             }
         }
-
+        std::cout << "Splitting leaf with prefix: " << std::endl;
+        for (auto& p: prefix){
+            std::cout << p.symbol << "-" << p.level << " ";
+        }
         return std::make_pair(leftNode, rightNode);
     }
     return std::make_pair(nullptr, nullptr);
