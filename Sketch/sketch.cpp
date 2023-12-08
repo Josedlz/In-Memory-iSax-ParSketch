@@ -1,5 +1,6 @@
 #include "sketch.h"
 #include <bits/stdc++.h>
+#include <chrono>
 using namespace std;
 
 void printCandidates(vector<tuple<long, vector<float>, float>> &candidates)
@@ -25,10 +26,14 @@ void printCandidates(vector<tuple<long, vector<float>, float>> &candidates)
 
 int main(int argc, char *argv[])
 {
+    auto startSketches = chrono::high_resolution_clock::now();
+
     int N = 20;
     int gridDimension = 5;
     int cellSize = 10;
+
     string datapath = "/home/renatoseb/2023-2/eda/proyecto/In-Memory-iSax-ParSketch/Dataset/datasets/synthetic/random_dataset/white_noise_dataset.txt";
+
     ParSketch searcher(datapath, gridDimension, cellSize);
     vector<vector<float>> R = searcher.ranD(N, searcher.getData().size());
 
@@ -57,12 +62,17 @@ int main(int argc, char *argv[])
         // Agregamos el sketch asignado a la lista de sketches
         sketches.push_back(progrSketch);
     }
+    auto stopSketches = chrono::high_resolution_clock::now();
+    auto durationSketches = chrono::duration_cast<chrono::duration<double>>(stopSketches - startSketches);
+    cout << "Tiempo de construcción de sketches: " << durationSketches.count() << " segundos" << endl;
+
+    auto startQuery = chrono::high_resolution_clock::now();
 
     double threshold = 0.2;
-    float fraction = 0.4;
+    float fraction = 0.45;
     int k = atoi(argv[1]);
     // Consultamos una serie temporal del dataset
-    vector<float> queryTS = data[2];
+    vector<float> queryTS = data[100];
     for (auto &t : queryTS)
     {
         cout << t << " ";
@@ -70,5 +80,9 @@ int main(int argc, char *argv[])
     cout << endl;
     auto ans = searcher.knnSearch(queryTS, R, breakpoints, threshold, k, fraction);
     printCandidates(ans);
+    auto stopQuery = chrono::high_resolution_clock::now();
+    auto durationQuery = chrono::duration_cast<chrono::duration<double>>(stopQuery - startQuery);
+    cout << "Tiempo de ejecución de la función de consulta: " << durationQuery.count() << " segundos" << endl;
+
     return 0;
 }
