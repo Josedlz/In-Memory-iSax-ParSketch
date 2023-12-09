@@ -68,8 +68,8 @@ public:
         // Almacena los candidatos potenciales
         vector<tuple<long, vector<float>, float>> candidates;
 
-        cout << "Dataset size: " << this->dataset.size() << endl;
-        // Itera sobre todas las series temporales en el conjunto de datos
+        // cout << "Dataset size: " << this->dataset.size() << endl;
+        //  Itera sobre todas las series temporales en el conjunto de datos
         for (size_t i = 0; i < this->dataset.size(); ++i)
         {
             auto ts = this->dataset[i];
@@ -89,13 +89,13 @@ public:
             }
         }
 
-        cout << "Candidates size: " << candidates.size() << endl;
-        // Calcula el número requerido de coincidencias según la fracción
+        // cout << "Candidates size: " << candidates.size() << endl;
+        //  Calcula el número requerido de coincidencias según la fracción
         int requiredMatches = static_cast<int>(fraction * progrSketch.size());
 
         // Filtra los candidatos que cumplen con el número requerido de coincidencias
         std::vector<std::tuple<long, std::vector<float>, float>> filteredCandidates;
-        cout << "Required matches: " << requiredMatches << endl;
+        // cout << "Required matches: " << requiredMatches << endl;
 
         for (const auto &candidate : candidates)
         {
@@ -110,7 +110,7 @@ public:
                 filteredCandidates.push_back(candidate);
             }
         }
-        cout << "Filtered candidates size: " << filteredCandidates.size() << endl;
+        // cout << "Filtered candidates size: " << filteredCandidates.size() << endl;
 
         // Ordenamos los candidatos por distancia
         std::sort(filteredCandidates.begin(), filteredCandidates.end(),
@@ -118,8 +118,8 @@ public:
                   { return std::get<2>(a) < std::get<2>(b); });
 
         // Limita la cantidad de resultados a los primeros k
-        cout << "K: " << k << endl;
-        cout << "Filtered candidates size: " << filteredCandidates.size() << endl;
+        // cout << "K: " << k << endl;
+        // cout << "Filtered candidates size: " << filteredCandidates.size() << endl;
         if (filteredCandidates.size() > k)
         {
             filteredCandidates.resize(k);
